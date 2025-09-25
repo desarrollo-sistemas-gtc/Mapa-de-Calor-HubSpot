@@ -32,8 +32,11 @@
       }
     }
 
-    // Leer locations.txt
-    fetch('locations.txt')
+    // Cache-busting: agregamos un timestamp a la URL
+    const cacheBuster = new Date().getTime();
+
+    // Leer locations.txt con cache dinámico
+    fetch(`locations.txt?v=${cacheBuster}`)
       .then(response => response.text())
       .then(async text => {
         const lines = text.split('\n');
