@@ -1,34 +1,48 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cupón de Descuento</title>
-
-  <!-- Estilos de Leaflet -->
-  <!-- CSS -->
+  <title>Mapa desde TXT</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-
 </head>
-
 <body>
   <div id="map" style="height:900px;"></div>
-
-  <!-- Script de Leaflet -->
-  <!-- JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
-  <!-- Tu código -->
   <script>
-    var map = L.map('map').setView([19.4326, -99.1332], 13); // CDMX
+    var map = L.map('map').setView([19.4326, -99.1332], 5); // Vista general de México
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
-    L.marker([19.4326, -99.1332]).addTo(map).bindPopup('¡Aquí está el punto!');
+
+    // Función para obtener coordenadas desde código postal y país
+    async function geocode(postal, country) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${encodeURIComponent(postal)}&country=${encodeURIComponent(country)}`;
+      const response = await fetch(url, { headers: { 'Accept-Language': 'es' }});
+      const data = await response.json();
+      if(data.length > 0) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      } else {
+        console.warn("No se encontró ubicación para:", postal, country);
+        return null;
+      }
+    }
+
+    // Leer locations.txt
+    fetch('locations.txt')
+      .then(response => response.text())
+      .then(async text => {
+        const lines = text.split('\n');
+        for(const line of lines) {
+          if(!line.trim()) continue;
+          const [postal, country] = line.split('|');
+          const coords = await geocode(postal, country);
+          if(coords) {
+            L.marker(coords).addTo(map).bindPopup(`${postal}, ${country}`);
+          }
+        }
+      })
+      .catch(err => console.error(err));
   </script>
 </body>
-
 </html>
