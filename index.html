@@ -42,6 +42,7 @@
       .then(async text => {
         const lines = text.split('\n');
         for(const line of lines) {
+          console.log("Procesando línea:", line);
           if(!line.trim()) continue;
           const [id, deal_name, postal, agencia] = line.split('|');
           const coords = await geocode(postal, country);
