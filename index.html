@@ -14,7 +14,7 @@
   <div id="map" style="height:900px;"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([19.4326, -99.1332], 9); // Vista general de México
+    var map = L.map('map').setView([19.4326, -99.1332], 8); // Vista general de México
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
@@ -42,8 +42,8 @@
         const lines = text.split('\n');
         for(const line of lines) {
           if(!line.trim()) continue;
-          const [postal, country] = line.split('|');
-          const coords = await geocode(postal, country);
+          const [id, deal_name, postal, agencia] = line.split('|');
+          const coords = await geocode(postal, 'México');
           if(coords) {
             L.marker(coords).addTo(map).bindPopup(`${postal}, ${country}`);
           }
