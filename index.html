@@ -44,10 +44,13 @@
         for(const line of lines) {
           console.log("Procesando línea:", line);
           if(!line.trim()) continue;
-          const [id, deal_name, postal, agencia] = line.split('|');
-          const coords = await geocode(postal, country);
-          if(coords) {
-            L.marker(coords).addTo(map).bindPopup(`${postal}, ${country}`);
+          const [id, deal_name, postal, agencia, lat, long] = line.split('|');
+          if(lat != null && long != null && lat !== '' && long !== '') {            
+            let coords = [parseFloat(lat), parseFloat(long)];
+            //const coords = await geocode(postal, country);
+            if(coords) {
+              L.marker(coords).addTo(map).bindPopup(`${postal}, ${country}`);
+            }
           }
         }
       })
