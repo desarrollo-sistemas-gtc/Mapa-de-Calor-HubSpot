@@ -46,13 +46,11 @@
           if(!line.trim()) continue;
           const [id, deal_name, postal, agencia, lat, long] = line.split('|');
           console.log("lat:", lat, "long:", long);
-          if(lat != 'null' && long != 'null') {            
-            let coords = [parseFloat(lat), parseFloat(long)];
-            //const coords = await geocode(postal, country);
-            if(coords) {
-              L.marker(coords).addTo(map).bindPopup(`${postal}, ${country}`);
-            }
-          }
+          const latNum = parseFloat(lat);
+          const longNum = parseFloat(long);
+
+          if (!isNaN(latNum) && !isNaN(longNum)) 
+            L.marker([latNum, longNum]).addTo(map).bindPopup(`${postal}, ${country}`);
         }
       })
       .catch(err => console.error(err));
