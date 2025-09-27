@@ -46,7 +46,7 @@
           if(!line.trim()) continue;
           const [id, deal_name, postal, agencia, lat, long] = line.split('|');
           console.log("lat:", lat, "long:", long);
-          if(lat != null && long != null && lat !== '' && long !== '') {            
+          if(lat != 'null' && long != 'null') {            
             let coords = [parseFloat(lat), parseFloat(long)];
             //const coords = await geocode(postal, country);
             if(coords) {
