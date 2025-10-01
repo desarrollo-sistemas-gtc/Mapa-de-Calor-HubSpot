@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,8 +10,30 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="index.css"/>
+  <!--<link rel="stylesheet" href="index.css"/>-->
+  <style>
+    .custom-marker {
+      background-color: #e74c3c;
+      width: 25px;
+      height: 41px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 2px solid #c0392b;
+    }
+
+    .custom-marker::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
 </head>
+
 <body>
   <div id="map" style="height:900px;"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -31,9 +54,9 @@
     // Función para obtener coordenadas desde código postal y país
     async function geocode(postal, country) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${encodeURIComponent(postal)}&country=${encodeURIComponent(country)}`;
-      const response = await fetch(url, { headers: { 'Accept-Language': 'es' }});
+      const response = await fetch(url, { headers: { 'Accept-Language': 'es' } });
       const data = await response.json();
-      if(data.length > 0) {
+      if (data.length > 0) {
         return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
       } else {
         console.warn("No se encontró ubicación para:", postal, country);
@@ -49,19 +72,20 @@
       .then(response => response.text())
       .then(async text => {
         const lines = text.split('\n');
-        for(const line of lines) {
+        for (const line of lines) {
           console.log("Procesando línea:", line);
-          if(!line.trim()) continue;
+          if (!line.trim()) continue;
           const [id, deal_name, postal, agencia, lat, long] = line.split('|');
           console.log("lat:", lat, "long:", long);
           const latNum = parseFloat(lat);
           const longNum = parseFloat(long);
 
-          if (!isNaN(latNum) && !isNaN(longNum)) 
-            L.marker([latNum, longNum], { icon: customIcon}).addTo(map).bindPopup(`${postal}, ${country}`);
+          if (!isNaN(latNum) && !isNaN(longNum))
+            L.marker([latNum, longNum], { icon: customIcon }).addTo(map).bindPopup(`${postal}, ${country}`);
         }
       })
       .catch(err => console.error(err));
   </script>
 </body>
+
 </html>
