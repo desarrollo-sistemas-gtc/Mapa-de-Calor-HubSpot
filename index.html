@@ -9,6 +9,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="index.css"/>
 </head>
 <body>
   <div id="map" style="height:900px;"></div>
@@ -19,6 +20,13 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+
+    const customIcon = L.divIcon({
+      className: 'custom-marker',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34]
+    });
 
     // Función para obtener coordenadas desde código postal y país
     async function geocode(postal, country) {
@@ -50,7 +58,7 @@
           const longNum = parseFloat(long);
 
           if (!isNaN(latNum) && !isNaN(longNum)) 
-            L.marker([latNum, longNum]).addTo(map).bindPopup(`${postal}, ${country}`);
+            L.marker([latNum, longNum], { icon: customIcon}).addTo(map).bindPopup(`${postal}, ${country}`);
         }
       })
       .catch(err => console.error(err));
