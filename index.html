@@ -2,15 +2,173 @@
 <html lang="es">
 
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa cluster por agencia</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet.markercluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    #map {
+      height: 900px;
+    }
+
+    /* marcador circular coloreado */
+    .custom-marker {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .marker-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-size: 11px;
+      color: #fff;
+      font-weight: 600;
+      pointer-events: none;
+      text-align: center;
+      line-height: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <script>
+    const country = "México";
+    const map = L.map('map').setView([19.4326, -99.1332], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Generador de color determinístico por cadena (hash simple -> HSL)
+    function colorForString(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        hash = hash & hash;
+      }
+      const h = Math.abs(hash) % 360;
+      return `hsl(${h} 70% 45%)`;
+    }
+
+    // Crear icono div circular con color y opcional etiqueta
+    function makeColoredIcon(color, labelText) {
+      const html = `
+        <div class="custom-marker" style="background:${color}; position: relative;">
+          <div class="marker-label">${labelText ? labelText[0].toUpperCase() : ''}</div>
+        </div>`;
+      return L.divIcon({
+        html,
+        className: '', // quitamos clases extra para que el estilo inline funcione
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+        popupAnchor: [0, -11]
+      });
+    }
+
+    // Contenedor para clusters por agencia
+    const clustersByAgency = {};
+    const overlays = {}; // para control de capas
+    const allMarkerBounds = L.latLngBounds();
+
+    // Cache-busting
+    const cacheBuster = new Date().getTime();
+
+    // Leer y procesar locations.txt (mismo formato id|deal_name|postal|agencia|lat|long)
+    fetch(`locations.txt?v=${cacheBuster}`)
+      .then(r => r.text())
+      .then(async text => {
+        const lines = text.split('\n');
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          // split seguro: permitimos que algunos campos contengan |
+          const parts = line.split('|');
+          // asumimos 6 columnas como en tu ejemplo
+          const [id, deal_name, postal, agenciaRaw, latRaw, longRaw] = parts;
+          const agencia = (agenciaRaw || 'Sin Agencia').trim();
+          const lat = parseFloat(latRaw);
+          const lon = parseFloat(longRaw);
+
+          if (isNaN(lat) || isNaN(lon)) {
+            // Si quieres geocodificar cuando faltan coords, agrega aquí tu lógica de geocode()
+            console.warn('Coordenadas inválidas para', line);
+            continue;
+          }
+
+          // Crear clusterGroup si no existe
+          if (!clustersByAgency[agencia]) {
+            // Opcional: puedes pasar opciones a markerClusterGroup
+            const mgroup = L.markerClusterGroup({ chunkedLoading: true });
+            clustersByAgency[agencia] = mgroup;
+            overlays[agencia] = mgroup;
+          }
+
+          // Icono coloreado por agencia
+          const color = colorForString(agencia);
+          const icon = makeColoredIcon(color, agencia);
+
+          const marker = L.marker([lat, lon], { icon })
+            .bindPopup(`<strong>${deal_name || ''}</strong><br/>Agencia: ${agencia}<br/>CP: ${postal || ''}`);
+
+          clustersByAgency[agencia].addLayer(marker);
+          allMarkerBounds.extend([lat, lon]);
+        }
+
+        // Añadir todos los grupos al mapa y añadir control de capas
+        Object.keys(clustersByAgency).forEach(ag => {
+          clustersByAgency[ag].addTo(map);
+        });
+
+        // Capa base (vacía porque ya añadimos la capa de tiles arriba)
+        L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+
+        // Ajustar vista si hay marcadores
+        if (allMarkerBounds.isValid()) {
+          map.fitBounds(allMarkerBounds, { padding: [40, 40] });
+        }
+      })
+      .catch(err => {
+        console.error('Error leyendo locations.txt:', err);
+      });
+
+    // Ejemplo de polígono (dejado como en tu original)
+    var latlngs = [[37, -109.05], [41, -109.03], [41, -102.05], [37, -102.04]];
+    var polygon = L.polygon(latlngs, { color: 'red' }).addTo(map);
+  </script>
+</body>
+
+</html>
+
+<!-- Código original para reestablecer -->
+
+<!--<!DOCTYPE html>
+<html lang="es">
+
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mapa de Calor</title>
-  <!-- Evitar cache de la página -->
+  <!-- Evitar cache de la página 
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!--<link rel="stylesheet" href="index.css"/>-->
+  <!--<link rel="stylesheet" href="index.css"/>
   <style>
     .custom-marker {
       background-color: #e74c3c;
@@ -91,4 +249,4 @@
   </script>
 </body>
 
-</html>
+</html> -->
