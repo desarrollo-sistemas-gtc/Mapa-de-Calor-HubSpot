@@ -1,61 +1,55 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mapa cluster por agencia</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mapa - Cluster por Agencia</title>
 
-  <!-- Leaflet -->
+  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Leaflet.markercluster -->
+  <!-- Leaflet.markercluster CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <style>
-    #map {
-      height: 900px;
-    }
-
-    /* marcador circular coloreado */
+    html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    #map { height: 900px; width: 100%; }
+    /* Marcador circular coloreado (icono individual) */
     .custom-marker {
       display: inline-block;
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
-    }
-
-    .marker-label {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      font-size: 11px;
-      color: #fff;
-      font-weight: 600;
-      pointer-events: none;
+      border: 2px solid rgba(255,255,255,0.85);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
       text-align: center;
       line-height: 22px;
-      width: 22px;
-      height: 22px;
+      font-weight: 700;
+      color: white;
+      font-size: 12px;
     }
   </style>
 </head>
-
 <body>
   <div id="map"></div>
 
   <script>
+    // -------------------------
+    // Configuración inicial
+    // -------------------------
     const country = "México";
     const map = L.map('map').setView([19.4326, -99.1332], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Generador de color determinístico por cadena (hash simple -> HSL)
+    // -------------------------
+    // Utilidades
+    // -------------------------
+    // Generador determinístico de color HSL a partir de string
     function colorForString(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -63,96 +57,147 @@
         hash = hash & hash;
       }
       const h = Math.abs(hash) % 360;
+      // retorno en formato CSS moderno (HSL con espacios es soportado)
       return `hsl(${h} 70% 45%)`;
     }
 
-    // Crear icono div circular con color y opcional etiqueta
+    // Crear icono DIV circular con color y etiqueta inicial
     function makeColoredIcon(color, labelText) {
-      const html = `
-        <div class="custom-marker" style="background:${color}; position: relative;">
-          <div class="marker-label">${labelText ? labelText[0].toUpperCase() : ''}</div>
-        </div>`;
+      const label = labelText ? labelText[0].toUpperCase() : '';
+      const html = `<div class="custom-marker" style="background:${color};">${label}</div>`;
       return L.divIcon({
         html,
-        className: '', // quitamos clases extra para que el estilo inline funcione
+        className: '',
         iconSize: [22, 22],
         iconAnchor: [11, 11],
         popupAnchor: [0, -11]
       });
     }
 
-    // Contenedor para clusters por agencia
-    const clustersByAgency = {};
-    const overlays = {}; // para control de capas
+    // -------------------------
+    // Contenedores por agencia
+    // -------------------------
+    const clustersByAgency = {}; // { "Nava": L.MarkerClusterGroup, ... }
+    const overlays = {};         // para L.control.layers
     const allMarkerBounds = L.latLngBounds();
 
-    // Cache-busting
+    // Lista de agencias que quieres mostrar por defecto.
+    // [] = mostrar todas. Si pones por ejemplo ['Nava','Sendero'] solo esas aparecerán al cargar.
+    const defaultShowAgencies = []; // ajustar si quieres mostrar solo un subconjunto
+
+    // -------------------------
+    // Leer locations.txt (mismo formato: id|deal_name|postal|agencia|lat|long)
+    // -------------------------
     const cacheBuster = new Date().getTime();
-
-    // Leer y procesar locations.txt (mismo formato id|deal_name|postal|agencia|lat|long)
     fetch(`locations.txt?v=${cacheBuster}`)
-      .then(r => r.text())
-      .then(async text => {
-        const lines = text.split('\n');
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          // split seguro: permitimos que algunos campos contengan |
-          const parts = line.split('|');
-          // asumimos 6 columnas como en tu ejemplo
-          const [id, deal_name, postal, agenciaRaw, latRaw, longRaw] = parts;
-          const agencia = (agenciaRaw || 'Sin Agencia').trim();
-          const lat = parseFloat(latRaw);
-          const lon = parseFloat(longRaw);
-
-          if (isNaN(lat) || isNaN(lon)) {
-            // Si quieres geocodificar cuando faltan coords, agrega aquí tu lógica de geocode()
-            console.warn('Coordenadas inválidas para', line);
-            continue;
-          }
-
-          // Crear clusterGroup si no existe
-          if (!clustersByAgency[agencia]) {
-            // Opcional: puedes pasar opciones a markerClusterGroup
-            const mgroup = L.markerClusterGroup({ chunkedLoading: true });
-            clustersByAgency[agencia] = mgroup;
-            overlays[agencia] = mgroup;
-          }
-
-          // Icono coloreado por agencia
-          const color = colorForString(agencia);
-          const icon = makeColoredIcon(color, agencia);
-
-          const marker = L.marker([lat, lon], { icon })
-            .bindPopup(`<strong>${deal_name || ''}</strong><br/>Agencia: ${agencia}<br/>CP: ${postal || ''}`);
-
-          clustersByAgency[agencia].addLayer(marker);
-          allMarkerBounds.extend([lat, lon]);
-        }
-
-        // Añadir todos los grupos al mapa y añadir control de capas
-        Object.keys(clustersByAgency).forEach(ag => {
-          clustersByAgency[ag].addTo(map);
-        });
-
-        // Capa base (vacía porque ya añadimos la capa de tiles arriba)
-        L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
-
-        // Ajustar vista si hay marcadores
-        if (allMarkerBounds.isValid()) {
-          map.fitBounds(allMarkerBounds, { padding: [40, 40] });
-        }
+      .then(r => {
+        if (!r.ok) throw new Error('Error al leer locations.txt: ' + r.status);
+        return r.text();
       })
-      .catch(err => {
-        console.error('Error leyendo locations.txt:', err);
+      .then(text => processLocationsText(text))
+      .catch(err => console.error(err));
+
+    async function processLocationsText(text) {
+      const lines = text.split('\n');
+
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) continue;
+
+        // separar por '|' esperando: id|deal_name|postal|agencia|lat|long
+        const parts = line.split('|');
+
+        // seguridad: si hay menos de 6 partes, saltamos
+        if (parts.length < 6) {
+          console.warn('Línea con formato inesperado, se omite:', line);
+          continue;
+        }
+
+        const [id, deal_name, postal, agenciaRaw, latRaw, longRaw] = parts;
+        const agencia = (agenciaRaw || 'Sin Agencia').trim();
+        const lat = parseFloat(latRaw);
+        const lon = parseFloat(longRaw);
+
+        if (isNaN(lat) || isNaN(lon)) {
+          // Si no tienes coords, podrías geocodificar aquí con tu función geocode()
+          console.warn('Coordenadas inválidas para la línea (se omite):', line);
+          continue;
+        }
+
+        // Crear clusterGroup por agencia si no existe
+        if (!clustersByAgency[agencia]) {
+          const color = colorForString(agencia);
+
+          // iconCreateFunction personalizado para que el clúster tenga el color de la agencia
+          const mgroup = L.markerClusterGroup({
+            chunkedLoading: true,
+            iconCreateFunction: function(cluster) {
+              const count = cluster.getChildCount();
+              const size = count < 10 ? 36 : (count < 100 ? 44 : 52);
+              const html = `
+                <div style="
+                  width:${size}px;height:${size}px;
+                  border-radius:50%;
+                  display:flex;align-items:center;justify-content:center;
+                  background:${color}; color: white; font-weight:700;
+                  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+                  border: 2px solid rgba(255,255,255,0.7);
+                ">
+                  ${count}
+                </div>`;
+              return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size/2, size/2] });
+            }
+          });
+
+          clustersByAgency[agencia] = mgroup;
+          overlays[agencia] = mgroup;
+        }
+
+        // crear marcador con icono coloreado por agencia
+        const icon = makeColoredIcon(colorForString(agencia), agencia);
+        const marker = L.marker([lat, lon], { icon })
+          .bindPopup(`<strong>${deal_name || ''}</strong><br/>Agencia: ${agencia}<br/>CP: ${postal || ''}`);
+
+        clustersByAgency[agencia].addLayer(marker);
+        allMarkerBounds.extend([lat, lon]);
+      }
+
+      // Añadir al mapa según defaultShowAgencies (vacío = todas)
+      Object.keys(clustersByAgency).forEach(ag => {
+        const group = clustersByAgency[ag];
+        if (defaultShowAgencies.length === 0 || defaultShowAgencies.includes(ag)) {
+          group.addTo(map);
+        }
       });
 
-    // Ejemplo de polígono (dejado como en tu original)
+      // Añadir control de capas para activar/desactivar agencias
+      L.control.layers(null, overlays, {
+        collapsed: false,
+        position: 'topright'
+      }).addTo(map);
+
+      // Ajustar vista al contenido
+      if (allMarkerBounds.isValid()) {
+        map.fitBounds(allMarkerBounds, { padding: [40, 40] });
+      }
+    }
+
+    // -------------------------
+    // (Opcional) Polígono de ejemplo — lo mantuve de tu original
+    // -------------------------
     var latlngs = [[37, -109.05], [41, -109.03], [41, -102.05], [37, -102.04]];
-    var polygon = L.polygon(latlngs, { color: 'red' }).addTo(map);
+    var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
+
+    // -------------------------
+    // Nota sobre geocoding (opcional)
+    // -------------------------
+    // Si en algún caso no tienes lat/lon y quieres geocodificar por CP:
+    // async function geocode(postal, country) { ... } // usa tu implementación con Nominatim
+    // Ten en cuenta límites de uso de Nominatim (respeta rate limits).
   </script>
 </body>
-
 </html>
+
 
 <!-- Código original para reestablecer -->
 
