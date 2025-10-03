@@ -85,6 +85,9 @@
         }
       })
       .catch(err => console.error(err));
+
+      var latlngs = [[37, -109.05], [41, -109.03], [41, -102.05], [37, -102.04]];
+      var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
   </script>
 </body>
 
