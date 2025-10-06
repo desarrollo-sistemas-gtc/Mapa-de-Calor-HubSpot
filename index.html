@@ -30,7 +30,6 @@
       color: white;
       font-size: 12px;
     }
-    /* leyenda simple */
     .legend {
       background: white;
       padding: 8px 10px;
@@ -57,7 +56,6 @@
     // -------------------------
     // Inicialización mapa
     // -------------------------
-    const country = "México";
     const map = L.map('map').setView([19.4326, -99.1332], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -66,7 +64,6 @@
     // -------------------------
     // Utilidades
     // -------------------------
-    // Generador determinístico de color HSL a partir de string
     function colorForString(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -77,7 +74,6 @@
       return `hsl(${h} 70% 45%)`;
     }
 
-    // Crear icono DIV circular con color y etiqueta inicial
     function makeColoredIcon(color, labelText) {
       const label = labelText ? labelText[0].toUpperCase() : '';
       const html = `<div class="custom-marker" style="background:${color};">${label}</div>`;
@@ -90,19 +86,27 @@
       });
     }
 
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     // -------------------------
     // Contenedores por agencia
     // -------------------------
-    const clustersByAgency = {}; // { "Nava": L.MarkerClusterGroup, ... }
-    const overlays = {};         // para L.control.layers
+    const clustersByAgency = {}; // { "Nava": {group,color}, ... }
+    const overlays = {};
     const allMarkerBounds = L.latLngBounds();
-
-    // default show agencies (vacío = mostrar todas)
     const defaultShowAgencies = [];
 
     // -------------------------
-    // Leer merged_data.txt
-    // Formato esperado por línea: id|deal_name|postal|agencia|lat|long
+    // Leer merged_data.txt (o el archivo que sirvas)
+    // Formato: campos separados por '|' con lat y lon siendo los dos últimos campos.
     // -------------------------
     const cacheBuster = new Date().getTime();
     const sourceFile = `merged_data.txt?v=${cacheBuster}`;
@@ -120,42 +124,47 @@
 
     function processLocationsText(text) {
       const lines = text.split(/\r?\n/);
-      // coleccion para leyenda (agencia -> color)
       const legendInfo = {};
 
       for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line) continue;
 
-        // split con límite 6 para evitar romper si deal_name tiene '|'
-        const parts = line.split('|', 6);
+        // split sin límite: los dos últimos elementos serán lat y lon
+        const parts = line.split('|');
 
-        if (parts.length < 6) {
-          console.warn('Línea con formato inesperado (se omite):', line);
+        if (parts.length < 3) { // al menos id + algo + coordenadas esperadas al final
+          console.warn('Línea demasiado corta, se omite:', line);
           continue;
         }
 
-        const [id, deal_name, postal, agenciaRaw, latRaw, longRaw] = parts;
-        const agencia = (agenciaRaw || 'Sin Agencia').trim();
+        // Tomamos lat y lon de los últimos 2 elementos
+        const latRaw = parts[parts.length - 2];
+        const lonRaw = parts[parts.length - 1];
         const lat = parseFloat(latRaw);
-        const lon = parseFloat(longRaw);
+        const lon = parseFloat(lonRaw);
 
-        // validar coords
         if (isNaN(lat) || isNaN(lon)) {
-          console.warn('Coordenadas inválidas — se omite:', { id, postal, agencia, latRaw, longRaw });
+          console.warn('Coordenadas inválidas — se omite:', { line, latRaw, lonRaw });
           continue;
         }
 
-        // crear grupo por agencia si no existe
-        if (!clustersByAgency[agencia]) {
-          // calcular color una única vez por agencia
-          const color = colorForString(agencia);
+        // Campos iniciales esperados (pueden faltar; comprobamos)
+        const id = parts[0] || '';
+        const deal_name = parts.length > 1 ? parts[1] : '';
+        const agencia = parts.length > 2 ? parts[2] : 'Sin Agencia';
+        // Postal suele estar en la posición 3 en tu ejemplo; si no existe, cadena vacía
+        const postal = parts.length > 3 ? parts[3] : '';
 
+        const agenciaTrim = String(agencia).trim() || 'Sin Agencia';
+
+        // Crear grupo por agencia si no existe
+        if (!clustersByAgency[agenciaTrim]) {
+          const color = colorForString(agenciaTrim);
           const mgroup = L.markerClusterGroup({
             chunkedLoading: true,
             spiderfyOnMaxZoom: true,
             showCoverageOnHover: false,
-            // iconCreateFunction tiene acceso a color porque color está en este scope
             iconCreateFunction: (cluster) => {
               const count = cluster.getChildCount();
               const size = count < 10 ? 36 : (count < 100 ? 44 : 52);
@@ -174,23 +183,26 @@
             }
           });
 
-          clustersByAgency[agencia] = { group: mgroup, color };
-          overlays[agencia] = mgroup;
-          legendInfo[agencia] = color;
+          clustersByAgency[agenciaTrim] = { group: mgroup, color };
+          overlays[agenciaTrim] = mgroup;
+          legendInfo[agenciaTrim] = color;
         }
 
-        const { group } = clustersByAgency[agencia];
+        const { group, color } = clustersByAgency[agenciaTrim];
+        const icon = makeColoredIcon(color, agenciaTrim);
 
-        // crear marcador
-        const icon = makeColoredIcon(clustersByAgency[agencia].color, agencia);
-        const marker = L.marker([lat, lon], { icon })
-          .bindPopup(`<strong>${(deal_name || '').replace(/</g,'&lt;')}</strong><br/>Agencia: ${agencia}<br/>CP: ${postal || ''}`);
+        const safeDealName = escapeHtml(deal_name);
+        const safeAgencia = escapeHtml(agenciaTrim);
+        const safePostal = escapeHtml(postal);
 
+        const popupHtml = `<strong>${safeDealName}</strong><br/>Agencia: ${safeAgencia}<br/>CP: ${safePostal}`;
+
+        const marker = L.marker([lat, lon], { icon }).bindPopup(popupHtml);
         group.addLayer(marker);
         allMarkerBounds.extend([lat, lon]);
       }
 
-      // agregar grupos al mapa según defaultShowAgencies
+      // Añadir todos (o sólo defaultShowAgencies)
       Object.keys(clustersByAgency).forEach(ag => {
         const { group } = clustersByAgency[ag];
         if (defaultShowAgencies.length === 0 || defaultShowAgencies.includes(ag)) {
@@ -198,17 +210,15 @@
         }
       });
 
-      // control de capas
+      // Control de capas
       const overlaysForControl = {};
       Object.keys(overlays).forEach(k => overlaysForControl[k] = overlays[k]);
       L.control.layers(null, overlaysForControl, { collapsed: false, position: 'topright' }).addTo(map);
 
-      // ajustar vista
       if (allMarkerBounds.isValid()) {
         map.fitBounds(allMarkerBounds, { padding: [40, 40] });
       }
 
-      // crear leyenda DOM
       createLegend(Object.keys(legendInfo).sort(), legendInfo);
       wireButtonsToToggle();
     }
@@ -226,10 +236,9 @@
         }
         const items = agencias.map(a => {
           const color = legendInfo[a] || '#999';
-          return `<div class="legend-item"><div class="legend-swatch" style="background:${color}"></div><div>${a}</div></div>`;
+          return `<div class="legend-item"><div class="legend-swatch" style="background:${color}"></div><div>${escapeHtml(a)}</div></div>`;
         }).join('');
         div.innerHTML = `<strong>Agencias</strong><div style="margin-top:6px">${items}</div>`;
-        // evitar que la leyenda capture clicks y evite arrastre del mapa
         L.DomEvent.disableClickPropagation(div);
         return div;
       };
@@ -256,14 +265,13 @@
     }
 
     // -------------------------
-    // (Opcional) ejemplo de polígono
+    // (Opcional) polígono de ejemplo
     // -------------------------
     var latlngs = [[37, -109.05], [41, -109.03], [41, -102.05], [37, -102.04]];
     var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
   </script>
 </body>
 </html>
-
 
 <!-- Código original para reestablecer -->
 
