@@ -89,7 +89,7 @@
     // Leer locations.txt (mismo formato: id|deal_name|postal|agencia|lat|long)
     // -------------------------
     const cacheBuster = new Date().getTime();
-    fetch(`locations.txt?v=${cacheBuster}`)
+    fetch(`merged_data.txt?v=${cacheBuster}`)
       .then(r => {
         if (!r.ok) throw new Error('Error al leer locations.txt: ' + r.status);
         return r.text();
@@ -197,7 +197,6 @@
   </script>
 </body>
 </html>
-
 
 <!-- Código original para reestablecer -->
 
