@@ -17,7 +17,6 @@
   <style>
     html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; }
     #map { height: 900px; width: 100%; }
-    /* Marcador circular coloreado (icono individual) */
     .custom-marker {
       display: inline-block;
       width: 22px;
@@ -31,14 +30,32 @@
       color: white;
       font-size: 12px;
     }
+    /* leyenda simple */
+    .legend {
+      background: white;
+      padding: 8px 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      max-height: 250px;
+      overflow: auto;
+      font-size: 13px;
+    }
+    .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .legend-swatch { width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,0.1); }
+    .controls { position: absolute; top: 10px; left: 10px; z-index: 1000; }
+    .controls button { margin-right:6px; padding:6px 8px; font-size:13px; }
   </style>
 </head>
 <body>
+  <div class="controls">
+    <button id="btnShowAll">Mostrar todas</button>
+    <button id="btnHideAll">Ocultar todas</button>
+  </div>
   <div id="map"></div>
 
   <script>
     // -------------------------
-    // Configuración inicial
+    // Inicialización mapa
     // -------------------------
     const country = "México";
     const map = L.map('map').setView([19.4326, -99.1332], 8);
@@ -57,7 +74,6 @@
         hash = hash & hash;
       }
       const h = Math.abs(hash) % 360;
-      // retorno en formato CSS moderno (HSL con espacios es soportado)
       return `hsl(${h} 70% 45%)`;
     }
 
@@ -81,35 +97,41 @@
     const overlays = {};         // para L.control.layers
     const allMarkerBounds = L.latLngBounds();
 
-    // Lista de agencias que quieres mostrar por defecto.
-    // [] = mostrar todas. Si pones por ejemplo ['Nava','Sendero'] solo esas aparecerán al cargar.
-    const defaultShowAgencies = []; // ajustar si quieres mostrar solo un subconjunto
+    // default show agencies (vacío = mostrar todas)
+    const defaultShowAgencies = [];
 
     // -------------------------
-    // Leer locations.txt (mismo formato: id|deal_name|postal|agencia|lat|long)
+    // Leer merged_data.txt
+    // Formato esperado por línea: id|deal_name|postal|agencia|lat|long
     // -------------------------
     const cacheBuster = new Date().getTime();
-    fetch(`merged_data.txt?v=${cacheBuster}`)
+    const sourceFile = `merged_data.txt?v=${cacheBuster}`;
+
+    fetch(sourceFile)
       .then(r => {
-        if (!r.ok) throw new Error('Error al leer locations.txt: ' + r.status);
+        if (!r.ok) throw new Error('Error al leer ' + sourceFile + ' : ' + r.status);
         return r.text();
       })
       .then(text => processLocationsText(text))
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error('No se pudo leer el archivo de datos:', err);
+        alert('Error al cargar los datos. Revisa consola para detalle.');
+      });
 
-    async function processLocationsText(text) {
-      const lines = text.split('\n');
+    function processLocationsText(text) {
+      const lines = text.split(/\r?\n/);
+      // coleccion para leyenda (agencia -> color)
+      const legendInfo = {};
 
       for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line) continue;
 
-        // separar por '|' esperando: id|deal_name|postal|agencia|lat|long
-        const parts = line.split('|');
+        // split con límite 6 para evitar romper si deal_name tiene '|'
+        const parts = line.split('|', 6);
 
-        // seguridad: si hay menos de 6 partes, saltamos
         if (parts.length < 6) {
-          console.warn('Línea con formato inesperado, se omite:', line);
+          console.warn('Línea con formato inesperado (se omite):', line);
           continue;
         }
 
@@ -118,20 +140,23 @@
         const lat = parseFloat(latRaw);
         const lon = parseFloat(longRaw);
 
+        // validar coords
         if (isNaN(lat) || isNaN(lon)) {
-          // Si no tienes coords, podrías geocodificar aquí con tu función geocode()
-          console.warn('Coordenadas inválidas para la línea (se omite):', line);
+          console.warn('Coordenadas inválidas — se omite:', { id, postal, agencia, latRaw, longRaw });
           continue;
         }
 
-        // Crear clusterGroup por agencia si no existe
+        // crear grupo por agencia si no existe
         if (!clustersByAgency[agencia]) {
+          // calcular color una única vez por agencia
           const color = colorForString(agencia);
 
-          // iconCreateFunction personalizado para que el clúster tenga el color de la agencia
           const mgroup = L.markerClusterGroup({
             chunkedLoading: true,
-            iconCreateFunction: function(cluster) {
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            // iconCreateFunction tiene acceso a color porque color está en este scope
+            iconCreateFunction: (cluster) => {
               const count = cluster.getChildCount();
               const size = count < 10 ? 36 : (count < 100 ? 44 : 52);
               const html = `
@@ -149,54 +174,96 @@
             }
           });
 
-          clustersByAgency[agencia] = mgroup;
+          clustersByAgency[agencia] = { group: mgroup, color };
           overlays[agencia] = mgroup;
+          legendInfo[agencia] = color;
         }
 
-        // crear marcador con icono coloreado por agencia
-        const icon = makeColoredIcon(colorForString(agencia), agencia);
-        const marker = L.marker([lat, lon], { icon })
-          .bindPopup(`<strong>${deal_name || ''}</strong><br/>Agencia: ${agencia}<br/>CP: ${postal || ''}`);
+        const { group } = clustersByAgency[agencia];
 
-        clustersByAgency[agencia].addLayer(marker);
+        // crear marcador
+        const icon = makeColoredIcon(clustersByAgency[agencia].color, agencia);
+        const marker = L.marker([lat, lon], { icon })
+          .bindPopup(`<strong>${(deal_name || '').replace(/</g,'&lt;')}</strong><br/>Agencia: ${agencia}<br/>CP: ${postal || ''}`);
+
+        group.addLayer(marker);
         allMarkerBounds.extend([lat, lon]);
       }
 
-      // Añadir al mapa según defaultShowAgencies (vacío = todas)
+      // agregar grupos al mapa según defaultShowAgencies
       Object.keys(clustersByAgency).forEach(ag => {
-        const group = clustersByAgency[ag];
+        const { group } = clustersByAgency[ag];
         if (defaultShowAgencies.length === 0 || defaultShowAgencies.includes(ag)) {
           group.addTo(map);
         }
       });
 
-      // Añadir control de capas para activar/desactivar agencias
-      L.control.layers(null, overlays, {
-        collapsed: false,
-        position: 'topright'
-      }).addTo(map);
+      // control de capas
+      const overlaysForControl = {};
+      Object.keys(overlays).forEach(k => overlaysForControl[k] = overlays[k]);
+      L.control.layers(null, overlaysForControl, { collapsed: false, position: 'topright' }).addTo(map);
 
-      // Ajustar vista al contenido
+      // ajustar vista
       if (allMarkerBounds.isValid()) {
         map.fitBounds(allMarkerBounds, { padding: [40, 40] });
       }
+
+      // crear leyenda DOM
+      createLegend(Object.keys(legendInfo).sort(), legendInfo);
+      wireButtonsToToggle();
     }
 
     // -------------------------
-    // (Opcional) Polígono de ejemplo — lo mantuve de tu original
+    // Leyenda y botones
+    // -------------------------
+    function createLegend(agencias, legendInfo) {
+      const legend = L.control({ position: 'bottomright' });
+      legend.onAdd = function () {
+        const div = L.DomUtil.create('div', 'legend');
+        if (agencias.length === 0) {
+          div.innerHTML = '<div>No hay agencias</div>';
+          return div;
+        }
+        const items = agencias.map(a => {
+          const color = legendInfo[a] || '#999';
+          return `<div class="legend-item"><div class="legend-swatch" style="background:${color}"></div><div>${a}</div></div>`;
+        }).join('');
+        div.innerHTML = `<strong>Agencias</strong><div style="margin-top:6px">${items}</div>`;
+        // evitar que la leyenda capture clicks y evite arrastre del mapa
+        L.DomEvent.disableClickPropagation(div);
+        return div;
+      };
+      legend.addTo(map);
+    }
+
+    function wireButtonsToToggle() {
+      const btnShowAll = document.getElementById('btnShowAll');
+      const btnHideAll = document.getElementById('btnHideAll');
+
+      btnShowAll.addEventListener('click', () => {
+        Object.keys(clustersByAgency).forEach(ag => {
+          const { group } = clustersByAgency[ag];
+          if (!map.hasLayer(group)) map.addLayer(group);
+        });
+      });
+
+      btnHideAll.addEventListener('click', () => {
+        Object.keys(clustersByAgency).forEach(ag => {
+          const { group } = clustersByAgency[ag];
+          if (map.hasLayer(group)) map.removeLayer(group);
+        });
+      });
+    }
+
+    // -------------------------
+    // (Opcional) ejemplo de polígono
     // -------------------------
     var latlngs = [[37, -109.05], [41, -109.03], [41, -102.05], [37, -102.04]];
     var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
-
-    // -------------------------
-    // Nota sobre geocoding (opcional)
-    // -------------------------
-    // Si en algún caso no tienes lat/lon y quieres geocodificar por CP:
-    // async function geocode(postal, country) { ... } // usa tu implementación con Nominatim
-    // Ten en cuenta límites de uso de Nominatim (respeta rate limits).
   </script>
 </body>
 </html>
+
 
 <!-- Código original para reestablecer -->
 
