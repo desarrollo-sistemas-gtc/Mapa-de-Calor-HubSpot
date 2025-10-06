@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mapa - Cluster por Agencia</title>
+  <title>Mapa - Cluster por Agencia (robusto)</title>
 
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -15,36 +16,72 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <style>
-    html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    #map { height: 900px; width: 100%; }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #map {
+      height: 900px;
+      width: 100%;
+    }
+
     .custom-marker {
       display: inline-block;
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.85);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
       text-align: center;
       line-height: 22px;
       font-weight: 700;
       color: white;
       font-size: 12px;
     }
+
     .legend {
       background: white;
       padding: 8px 10px;
       border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
       max-height: 250px;
       overflow: auto;
       font-size: 13px;
     }
-    .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-    .legend-swatch { width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,0.1); }
-    .controls { position: absolute; top: 10px; left: 10px; z-index: 1000; }
-    .controls button { margin-right:6px; padding:6px 8px; font-size:13px; }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+    }
+
+    .controls button {
+      margin-right: 6px;
+      padding: 6px 8px;
+      font-size: 13px;
+    }
   </style>
 </head>
+
 <body>
   <div class="controls">
     <button id="btnShowAll">Mostrar todas</button>
@@ -53,17 +90,9 @@
   <div id="map"></div>
 
   <script>
-    // -------------------------
-    // Inicialización mapa
-    // -------------------------
     const map = L.map('map').setView([19.4326, -99.1332], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
 
-    // -------------------------
-    // Utilidades
-    // -------------------------
     function colorForString(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -77,37 +106,30 @@
     function makeColoredIcon(color, labelText) {
       const label = labelText ? labelText[0].toUpperCase() : '';
       const html = `<div class="custom-marker" style="background:${color};">${label}</div>`;
-      return L.divIcon({
-        html,
-        className: '',
-        iconSize: [22, 22],
-        iconAnchor: [11, 11],
-        popupAnchor: [0, -11]
-      });
+      return L.divIcon({ html, className: '', iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -11] });
     }
 
     function escapeHtml(text) {
       if (!text) return '';
-      return String(text)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
-    // -------------------------
-    // Contenedores por agencia
-    // -------------------------
-    const clustersByAgency = {}; // { "Nava": {group,color}, ... }
+    // Validadores de rango
+    function isValidLat(n) { return typeof n === 'number' && !isNaN(n) && n >= -90 && n <= 90; }
+    function isValidLon(n) { return typeof n === 'number' && !isNaN(n) && n >= -180 && n <= 180; }
+
+    // Detectar CP (4 o 5 dígitos) en un token
+    function tokenLooksLikePostal(t) {
+      if (!t) return false;
+      const s = String(t).trim();
+      return /^\d{4,5}$/.test(s);
+    }
+
+    const clustersByAgency = {};
     const overlays = {};
     const allMarkerBounds = L.latLngBounds();
     const defaultShowAgencies = [];
 
-    // -------------------------
-    // Leer merged_data.txt (o el archivo que sirvas)
-    // Formato: campos separados por '|' con lat y lon siendo los dos últimos campos.
-    // -------------------------
     const cacheBuster = new Date().getTime();
     const sourceFile = `merged_data.txt?v=${cacheBuster}`;
 
@@ -117,127 +139,166 @@
         return r.text();
       })
       .then(text => processLocationsText(text))
-      .catch(err => {
-        console.error('No se pudo leer el archivo de datos:', err);
-        alert('Error al cargar los datos. Revisa consola para detalle.');
-      });
+      .catch(err => { console.error('Error cargando datos:', err); alert('Error al cargar datos. Mira consola.'); });
 
     function processLocationsText(text) {
       const lines = text.split(/\r?\n/);
       const legendInfo = {};
-
+      let total = 0, added = 0, skipped = 0;
       for (const rawLine of lines) {
+        total++;
         const line = rawLine.trim();
-        if (!line) continue;
+        if (!line) { total--; continue; }
 
-        // split sin límite: los dos últimos elementos serán lat y lon
-        const parts = line.split('|');
-
-        if (parts.length < 3) { // al menos id + algo + coordenadas esperadas al final
-          console.warn('Línea demasiado corta, se omite:', line);
-          continue;
+        const parts = line.split('|').map(p => p === '' ? null : p); // null por vacíos
+        if (parts.length < 3) {
+          console.warn('Línea demasiado corta, omito:', line);
+          skipped++; continue;
         }
 
-        // Tomamos lat y lon de los últimos 2 elementos
-        const latRaw = parts[parts.length - 2];
-        const lonRaw = parts[parts.length - 1];
-        const lat = parseFloat(latRaw);
-        const lon = parseFloat(lonRaw);
+        // 1) Intento encontrar lat/lon válidos: busco tokens numéricos en todo el array que caigan en rangos.
+        const numericCandidates = parts.map((p, idx) => {
+          const v = p == null ? NaN : parseFloat(String(p).replace(',', '.'));
+          return { idx, raw: p, value: v, isLatRange: isValidLat(v), isLonRange: isValidLon(v) };
+        }).filter(x => !isNaN(x.value));
 
-        if (isNaN(lat) || isNaN(lon)) {
-          console.warn('Coordenadas inválidas — se omite:', { line, latRaw, lonRaw });
-          continue;
+        // Buscar pares válidos (lat, lon) tomando los últimos dos candidatos que formen un par válido lat-lon en orden.
+        let chosenLat = null, chosenLon = null;
+        if (numericCandidates.length >= 2) {
+          // Tomar los últimos N candidatos y buscar de atrás hacia adelante un par lat-lon consecutivo (o últimos dos)
+          for (let i = numericCandidates.length - 2; i >= 0; i--) {
+            const a = numericCandidates[i];
+            const b = numericCandidates[i + 1];
+            if (isValidLat(a.value) && isValidLon(b.value)) {
+              chosenLat = a.value; chosenLon = b.value;
+              break;
+            }
+          }
+          // si no encontré par consecutivo, tomar los dos últimos que estén en rango (aunque no consecutivos)
+          if (chosenLat === null) {
+            // filtrar por rango y tomar últimos dos: lat cand then lon cand
+            const latCandidates = numericCandidates.filter(c => c.isLatRange);
+            const lonCandidates = numericCandidates.filter(c => c.isLonRange);
+            if (latCandidates.length && lonCandidates.length) {
+              // elegir el último latCandidate cuyo índice sea < que algún lonCandidate posterior
+              let found = false;
+              for (let i = latCandidates.length - 1; i >= 0 && !found; i--) {
+                for (let j = lonCandidates.length - 1; j >= 0; j--) {
+                  if (latCandidates[i].idx < lonCandidates[j].idx) {
+                    chosenLat = latCandidates[i].value;
+                    chosenLon = lonCandidates[j].value;
+                    found = true; break;
+                  }
+                }
+              }
+            }
+          }
         }
 
-        // Campos iniciales esperados (pueden faltar; comprobamos)
+        if (chosenLat === null || chosenLon === null) {
+          console.warn('No se detectó un par lat/lon válido en la línea (se omite). Línea:', line, 'candidates:', numericCandidates);
+          skipped++; continue;
+        }
+
+        // 2) Identificar id y deal_name (asumimos id = parts[0], deal_name = parts[1] si existe)
         const id = parts[0] || '';
         const deal_name = parts.length > 1 ? parts[1] : '';
-        const agencia = parts.length > 2 ? parts[2] : 'Sin Agencia';
-        // Postal suele estar en la posición 3 en tu ejemplo; si no existe, cadena vacía
-        const postal = parts.length > 3 ? parts[3] : '';
 
-        const agenciaTrim = String(agencia).trim() || 'Sin Agencia';
+        // 3) Buscar postal dentro de los tokens (preferiblemente entre índice 2 y el índice del lat)
+        // Determinar índice máximo para buscar (antes del índice del chosenLat)
+        const latIdx = parts.map((p, i) => i).filter(i => {
+          const v = parts[i] == null ? NaN : parseFloat(String(parts[i]).replace(',', '.'));
+          return isValidLat(v);
+        }).pop();
+        const lonIdx = parts.map((p, i) => i).filter(i => {
+          const v = parts[i] == null ? NaN : parseFloat(String(parts[i]).replace(',', '.'));
+          return isValidLon(v);
+        }).pop();
+        const lastCoordIdx = Math.max(latIdx ?? -1, lonIdx ?? -1);
 
-        // Crear grupo por agencia si no existe
-        if (!clustersByAgency[agenciaTrim]) {
-          const color = colorForString(agenciaTrim);
+        // Buscar postal en posiciones 2..lastCoordIdx-1
+        let postal = '';
+        if (lastCoordIdx > 2) {
+          for (let i = 2; i < lastCoordIdx; i++) {
+            if (tokenLooksLikePostal(parts[i])) {
+              postal = String(parts[i]).trim();
+              break;
+            }
+          }
+        } else {
+          // fallback: buscar en todo el arreglo (excluyendo id y deal_name)
+          for (let i = 2; i < parts.length; i++) {
+            if (tokenLooksLikePostal(parts[i])) { postal = String(parts[i]).trim(); break; }
+          }
+        }
+
+        // 4) Intentar deducir agencia: primer token no numérico entre índice 2 y el índice donde encontramos postal (o antes de coords)
+        let agencia = '';
+        const searchEnd = (postal ? parts.indexOf(postal) : lastCoordIdx);
+        for (let i = 2; i < (searchEnd > 0 ? searchEnd : parts.length - 2); i++) {
+          const t = parts[i];
+          if (t == null) continue;
+          if (!/^\s*\d+\s*$/.test(String(t))) { agencia = String(t).trim(); break; }
+        }
+        if (!agencia) agencia = 'Sin Agencia';
+
+        // 5) Validar que chosenLat/chosenLon estén en rangos correctos (otra vez)
+        if (!isValidLat(chosenLat) || !isValidLon(chosenLon)) {
+          console.warn('Coordenadas fuera de rango finales — omito línea:', line, { chosenLat, chosenLon });
+          skipped++; continue;
+        }
+
+        // 6) Preparar grupo y marcador
+        const agenciaKey = agencia || 'Sin Agencia';
+        if (!clustersByAgency[agenciaKey]) {
+          const color = colorForString(agenciaKey);
           const mgroup = L.markerClusterGroup({
-            chunkedLoading: true,
-            spiderfyOnMaxZoom: true,
-            showCoverageOnHover: false,
+            chunkedLoading: true, spiderfyOnMaxZoom: true, showCoverageOnHover: false,
             iconCreateFunction: (cluster) => {
               const count = cluster.getChildCount();
               const size = count < 10 ? 36 : (count < 100 ? 44 : 52);
-              const html = `
-                <div style="
-                  width:${size}px;height:${size}px;
-                  border-radius:50%;
-                  display:flex;align-items:center;justify-content:center;
-                  background:${color}; color: white; font-weight:700;
-                  box-shadow: 0 0 6px rgba(0,0,0,0.4);
-                  border: 2px solid rgba(255,255,255,0.7);
-                ">
-                  ${count}
-                </div>`;
-              return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size/2, size/2] });
+              const html = `<div style="width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color};color:white;font-weight:700;box-shadow:0 0 6px rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.7)">${count}</div>`;
+              return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
             }
           });
-
-          clustersByAgency[agenciaTrim] = { group: mgroup, color };
-          overlays[agenciaTrim] = mgroup;
-          legendInfo[agenciaTrim] = color;
+          clustersByAgency[agenciaKey] = { group: mgroup, color };
+          overlays[agenciaKey] = mgroup;
         }
 
-        const { group, color } = clustersByAgency[agenciaTrim];
-        const icon = makeColoredIcon(color, agenciaTrim);
+        const { group, color } = clustersByAgency[agenciaKey];
+        const icon = makeColoredIcon(color, agenciaKey);
+        const safePopup = `<strong>${escapeHtml(deal_name)}</strong><br/>Agencia: ${escapeHtml(agenciaKey)}<br/>CP: ${escapeHtml(postal)}<br/>ID: ${escapeHtml(id)}`;
 
-        const safeDealName = escapeHtml(deal_name);
-        const safeAgencia = escapeHtml(agenciaTrim);
-        const safePostal = escapeHtml(postal);
-
-        const popupHtml = `<strong>${safeDealName}</strong><br/>Agencia: ${safeAgencia}<br/>CP: ${safePostal}`;
-
-        const marker = L.marker([lat, lon], { icon }).bindPopup(popupHtml);
+        const marker = L.marker([chosenLat, chosenLon], { icon }).bindPopup(safePopup);
         group.addLayer(marker);
-        allMarkerBounds.extend([lat, lon]);
-      }
+        allMarkerBounds.extend([chosenLat, chosenLon]);
+        added++;
+      } // end for lines
 
-      // Añadir todos (o sólo defaultShowAgencies)
+      // Añadir grupos al mapa
       Object.keys(clustersByAgency).forEach(ag => {
         const { group } = clustersByAgency[ag];
-        if (defaultShowAgencies.length === 0 || defaultShowAgencies.includes(ag)) {
-          group.addTo(map);
-        }
+        if (defaultShowAgencies.length === 0 || defaultShowAgencies.includes(ag)) group.addTo(map);
       });
 
-      // Control de capas
-      const overlaysForControl = {};
-      Object.keys(overlays).forEach(k => overlaysForControl[k] = overlays[k]);
+      // control de capas y leyenda
+      const overlaysForControl = {}; Object.keys(overlays).forEach(k => overlaysForControl[k] = overlays[k]);
       L.control.layers(null, overlaysForControl, { collapsed: false, position: 'topright' }).addTo(map);
 
-      if (allMarkerBounds.isValid()) {
-        map.fitBounds(allMarkerBounds, { padding: [40, 40] });
-      }
+      if (allMarkerBounds.isValid()) map.fitBounds(allMarkerBounds, { padding: [40, 40] });
 
-      createLegend(Object.keys(legendInfo).sort(), legendInfo);
+      createLegend(Object.keys(clustersByAgency).sort(), Object.fromEntries(Object.keys(clustersByAgency).map(k => [k, clustersByAgency[k].color])));
       wireButtonsToToggle();
-    }
 
-    // -------------------------
-    // Leyenda y botones
-    // -------------------------
+      console.info(`Procesamiento terminado. Total líneas: ${total}, añadidos: ${added}, omitidos: ${skipped}`);
+    } // end processLocationsText
+
     function createLegend(agencias, legendInfo) {
       const legend = L.control({ position: 'bottomright' });
       legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'legend');
-        if (agencias.length === 0) {
-          div.innerHTML = '<div>No hay agencias</div>';
-          return div;
-        }
-        const items = agencias.map(a => {
-          const color = legendInfo[a] || '#999';
-          return `<div class="legend-item"><div class="legend-swatch" style="background:${color}"></div><div>${escapeHtml(a)}</div></div>`;
-        }).join('');
+        if (agencias.length === 0) { div.innerHTML = '<div>No hay agencias</div>'; return div; }
+        const items = agencias.map(a => `<div class="legend-item"><div class="legend-swatch" style="background:${legendInfo[a] || '#999'}"></div><div>${escapeHtml(a)}</div></div>`).join('');
         div.innerHTML = `<strong>Agencias</strong><div style="margin-top:6px">${items}</div>`;
         L.DomEvent.disableClickPropagation(div);
         return div;
@@ -248,30 +309,18 @@
     function wireButtonsToToggle() {
       const btnShowAll = document.getElementById('btnShowAll');
       const btnHideAll = document.getElementById('btnHideAll');
-
-      btnShowAll.addEventListener('click', () => {
-        Object.keys(clustersByAgency).forEach(ag => {
-          const { group } = clustersByAgency[ag];
-          if (!map.hasLayer(group)) map.addLayer(group);
-        });
-      });
-
-      btnHideAll.addEventListener('click', () => {
-        Object.keys(clustersByAgency).forEach(ag => {
-          const { group } = clustersByAgency[ag];
-          if (map.hasLayer(group)) map.removeLayer(group);
-        });
-      });
+      btnShowAll.addEventListener('click', () => Object.keys(clustersByAgency).forEach(ag => { const { group } = clustersByAgency[ag]; if (!map.hasLayer(group)) map.addLayer(group); }));
+      btnHideAll.addEventListener('click', () => Object.keys(clustersByAgency).forEach(ag => { const { group } = clustersByAgency[ag]; if (map.hasLayer(group)) map.removeLayer(group); }));
     }
 
-    // -------------------------
-    // (Opcional) polígono de ejemplo
-    // -------------------------
+    // (opcional) polígono de ejemplo
     var latlngs = [[37, -109.05], [41, -109.03], [41, -102.05], [37, -102.04]];
-    var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
+    var polygon = L.polygon(latlngs, { color: 'red' }).addTo(map);
   </script>
 </body>
+
 </html>
+
 
 <!-- Código original para reestablecer -->
 
