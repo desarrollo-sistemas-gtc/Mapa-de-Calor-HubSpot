@@ -25014,7 +25014,6 @@
 44538694686|MANUEL  ALVARADO MARTINEZ|Nava|78387|Nissan - Pipeline Piso Nuevos|344823.0|MARCH|None|None|None|None|Credinissan|78387|22.1495|-100.9528
 44561116043|Elsa Perez Gutierrez|Centromax|36470|Nissan - Pipeline Digital Nuevo|345076.0|MAGNITE|None|None|CAC|MAGNITE EXCLUSIVE CVT|Credinissan|36470|20.7286|-101.9458
 44550576307|Lupita Sobrino Lavalle|Insur|01710|Nissan - Pipeline Piso Nuevos|3446192.0|None|None|None|None|KICKS ADVANCE CVT NEGRO|Contado|01710|19.3479|-99.2232
-44553251334|"Laura Fabiola Cedillo Martinez | PRUEBA"|Nava|7800|Nissan - Pipeline Piso Nuevos|343713.0|None|None|None|None|SENTRA SR CVT|Credinissan|None|None|None
 44546582859|JULIO RIOS ,|Forum|37235|Nissan - Pipeline Piso Nuevos|345195.0|VERSA|None|None|None|VERSA ADVANCE MT|Banorte|37235|21.1418|-101.6412
 44546273920|Areli Ortega Amaro|Nava|78350|Nissan - Pipeline Digital Nuevo|345080.0|FRONTIER|None|None|Formulario|Frontier XE TM|Credinissan|78350|22.1341|-100.9648
 44554957486|ANGEL  AVALOS   RIVERA|Carretera 57|78420|Nissan - Pipeline Piso Nuevos|None|VERSA|None|None|None|None|Credinissan|78420|22.1492|-100.8556
