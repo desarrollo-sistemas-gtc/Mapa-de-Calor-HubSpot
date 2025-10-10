@@ -100,11 +100,115 @@
       padding: 6px 8px;
       border-radius: 4px;
       margin-bottom: 2px;
+      cursor: pointer;
+    }
+
+    select[multiple] option:hover {
+      background: #ecf0f1;
     }
 
     select[multiple] option:checked {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+    }
+
+    /* Estilos para select abatible personalizado */
+    .custom-select-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .custom-select-trigger {
+      width: 100%;
+      padding: 8px 32px 8px 8px;
+      border-radius: 6px;
+      border: 1px solid #bdc3c7;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      transition: border-color 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .custom-select-trigger:hover {
+      border-color: #3498db;
+    }
+
+    .custom-select-trigger.active {
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .custom-select-arrow {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: transform 0.2s;
+      pointer-events: none;
+      color: #7f8c8d;
+    }
+
+    .custom-select-arrow.open {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    .custom-select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 6px;
+      margin-top: 4px;
+      max-height: 250px;
+      overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      display: none;
+    }
+
+    .custom-select-dropdown.open {
+      display: block;
+    }
+
+    .custom-select-option {
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .custom-select-option:hover {
+      background: #ecf0f1;
+    }
+
+    .custom-select-option.selected {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .custom-select-option input[type="checkbox"] {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+
+    .select-count-badge {
+      background: #3498db;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: auto;
     }
 
     .search-box {
@@ -300,30 +404,46 @@
 
     <div class="filter-group">
       <label for="filter-agencia">🏢 Agencia</label>
-      <select id="filter-agencia" multiple>
-        <option value="__ALL__" selected>— Todas —</option>
-      </select>
+      <div class="custom-select-wrapper" data-filter="agencia">
+        <div class="custom-select-trigger">
+          <span class="select-text">— Todas —</span>
+          <span class="custom-select-arrow">▼</span>
+        </div>
+        <div class="custom-select-dropdown"></div>
+      </div>
     </div>
 
     <div class="filter-group">
       <label for="filter-pipeline">📊 Pipeline</label>
-      <select id="filter-pipeline" multiple>
-        <option value="__ALL__" selected>— Todos —</option>
-      </select>
+      <div class="custom-select-wrapper" data-filter="pipeline">
+        <div class="custom-select-trigger">
+          <span class="select-text">— Todos —</span>
+          <span class="custom-select-arrow">▼</span>
+        </div>
+        <div class="custom-select-dropdown"></div>
+      </div>
     </div>
 
     <div class="filter-group">
       <label for="filter-modelo">🚗 Modelo de Interés CTC</label>
-      <select id="filter-modelo" multiple>
-        <option value="__ALL__" selected>— Todos —</option>
-      </select>
+      <div class="custom-select-wrapper" data-filter="modelo">
+        <div class="custom-select-trigger">
+          <span class="select-text">— Todos —</span>
+          <span class="custom-select-arrow">▼</span>
+        </div>
+        <div class="custom-select-dropdown"></div>
+      </div>
     </div>
 
     <div class="filter-group">
       <label for="filter-tipo">📝 Tipo de Solicitud</label>
-      <select id="filter-tipo" multiple>
-        <option value="__ALL__" selected>— Todos —</option>
-      </select>
+      <div class="custom-select-wrapper" data-filter="tipo">
+        <div class="custom-select-trigger">
+          <span class="select-text">— Todos —</span>
+          <span class="custom-select-arrow">▼</span>
+        </div>
+        <div class="custom-select-dropdown"></div>
+      </div>
     </div>
 
     <div class="filter-group">
@@ -482,6 +602,12 @@
             continue;
           }
 
+          // Validar que las coordenadas estén dentro de México
+          if (!this.isInMexico(record.latitud, record.longitud)) {
+            console.warn('Coordenadas fuera de México:', line);
+            continue;
+          }
+
           // Normalizar valores 'None' a null
           Object.keys(record).forEach(key => {
             if (record[key] && String(record[key]).toLowerCase() === 'none') {
@@ -500,30 +626,228 @@
         if (!value) return null;
         const parsed = parseFloat(String(value).replace(',', '.'));
         return isNaN(parsed) ? null : parsed;
+      },
+
+      isInMexico(lat, lon) {
+        // Límites geográficos aproximados de México
+        // Latitud: 14.5° N a 32.7° N
+        // Longitud: -118.4° W a -86.7° W
+        return lat >= 14.5 && lat <= 32.7 && lon >= -118.4 && lon <= -86.7;
       }
     };
 
     // ========================================
     // GESTIÓN DE FILTROS
     // ========================================
-    const FilterManager = {
-      getSelectedValues(selectId) {
-        const select = document.getElementById(selectId);
-        const values = Array.from(select.selectedOptions).map(opt => opt.value);
-        return values;
+    const CustomSelect = {
+      selectedValues: {
+        agencia: ['__ALL__'],
+        pipeline: ['__ALL__'],
+        modelo: ['__ALL__'],
+        tipo: ['__ALL__']
       },
 
-      buildFilterOptions() {
-        const fields = {
-          'filter-agencia': 'agencia',
-          'filter-pipeline': 'pipeline',
-          'filter-modelo': 'modelo_int_ctc',
-          'filter-tipo': 'tipo_solicitud_compra'
+      init() {
+        document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+          const trigger = wrapper.querySelector('.custom-select-trigger');
+          const dropdown = wrapper.querySelector('.custom-select-dropdown');
+          const arrow = wrapper.querySelector('.custom-select-arrow');
+
+          trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleDropdown(wrapper);
+          });
+
+          // Cerrar dropdown al hacer clic fuera
+          document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+              this.closeDropdown(wrapper);
+            }
+          });
+        });
+      },
+
+      toggleDropdown(wrapper) {
+        const dropdown = wrapper.querySelector('.custom-select-dropdown');
+        const trigger = wrapper.querySelector('.custom-select-trigger');
+        const arrow = wrapper.querySelector('.custom-select-arrow');
+        const isOpen = dropdown.classList.contains('open');
+
+        // Cerrar todos los otros dropdowns
+        document.querySelectorAll('.custom-select-dropdown').forEach(d => {
+          d.classList.remove('open');
+        });
+        document.querySelectorAll('.custom-select-trigger').forEach(t => {
+          t.classList.remove('active');
+        });
+        document.querySelectorAll('.custom-select-arrow').forEach(a => {
+          a.classList.remove('open');
+        });
+
+        if (!isOpen) {
+          dropdown.classList.add('open');
+          trigger.classList.add('active');
+          arrow.classList.add('open');
+        }
+      },
+
+      closeDropdown(wrapper) {
+        const dropdown = wrapper.querySelector('.custom-select-dropdown');
+        const trigger = wrapper.querySelector('.custom-select-trigger');
+        const arrow = wrapper.querySelector('.custom-select-arrow');
+
+        dropdown.classList.remove('open');
+        trigger.classList.remove('active');
+        arrow.classList.remove('open');
+      },
+
+      populateDropdown(filterType, values) {
+        const wrapper = document.querySelector(`[data-filter="${filterType}"]`);
+        const dropdown = wrapper.querySelector('.custom-select-dropdown');
+
+        let html = `
+          <div class="custom-select-option" data-value="__ALL__">
+            <input type="checkbox" ${this.selectedValues[filterType].includes('__ALL__') ? 'checked' : ''}>
+            <span>— Todos —</span>
+          </div>
+        `;
+
+        values.forEach(value => {
+          const isChecked = this.selectedValues[filterType].includes(value);
+          html += `
+            <div class="custom-select-option" data-value="${Utils.escapeHtml(value)}">
+              <input type="checkbox" ${isChecked ? 'checked' : ''}>
+              <span>${Utils.escapeHtml(value)}</span>
+            </div>
+          `;
+        });
+
+        dropdown.innerHTML = html;
+
+        // Agregar event listeners
+        dropdown.querySelectorAll('.custom-select-option').forEach(option => {
+          option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const checkbox = option.querySelector('input[type="checkbox"]');
+            const value = option.dataset.value;
+
+            if (value === '__ALL__') {
+              this.selectAll(filterType, wrapper);
+            } else {
+              this.toggleOption(filterType, value, wrapper);
+            }
+
+            this.updateTriggerText(wrapper, filterType);
+          });
+        });
+      },
+
+      selectAll(filterType, wrapper) {
+        const allOption = wrapper.querySelector('[data-value="__ALL__"]');
+        const allCheckbox = allOption.querySelector('input[type="checkbox"]');
+        const isAllChecked = allCheckbox.checked;
+
+        if (isAllChecked) {
+          // Deseleccionar todo
+          this.selectedValues[filterType] = [];
+          wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        } else {
+          // Seleccionar todo
+          this.selectedValues[filterType] = ['__ALL__'];
+          wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+          allCheckbox.checked = true;
+        }
+      },
+
+      toggleOption(filterType, value, wrapper) {
+        const option = wrapper.querySelector(`[data-value="${value}"]`);
+        const checkbox = option.querySelector('input[type="checkbox"]');
+        const allOption = wrapper.querySelector('[data-value="__ALL__"]');
+        const allCheckbox = allOption.querySelector('input[type="checkbox"]');
+
+        if (checkbox.checked) {
+          // Deseleccionar
+          checkbox.checked = false;
+          const index = this.selectedValues[filterType].indexOf(value);
+          if (index > -1) {
+            this.selectedValues[filterType].splice(index, 1);
+          }
+        } else {
+          // Seleccionar
+          checkbox.checked = true;
+
+          // Remover __ALL__ si existe
+          const allIndex = this.selectedValues[filterType].indexOf('__ALL__');
+          if (allIndex > -1) {
+            this.selectedValues[filterType].splice(allIndex, 1);
+            allCheckbox.checked = false;
+          }
+
+          if (!this.selectedValues[filterType].includes(value)) {
+            this.selectedValues[filterType].push(value);
+          }
+        }
+
+        // Si no hay nada seleccionado, seleccionar __ALL__
+        if (this.selectedValues[filterType].length === 0) {
+          this.selectedValues[filterType] = ['__ALL__'];
+          allCheckbox.checked = true;
+        }
+      },
+
+      updateTriggerText(wrapper, filterType) {
+        const trigger = wrapper.querySelector('.select-text');
+        const selected = this.selectedValues[filterType];
+
+        if (selected.includes('__ALL__') || selected.length === 0) {
+          const labels = {
+            agencia: '— Todas —',
+            pipeline: '— Todos —',
+            modelo: '— Todos —',
+            tipo: '— Todos —'
+          };
+          trigger.innerHTML = labels[filterType];
+        } else if (selected.length === 1) {
+          trigger.innerHTML = `${Utils.escapeHtml(selected[0])}`;
+        } else {
+          trigger.innerHTML = `${selected.length} seleccionados <span class="select-count-badge">${selected.length}</span>`;
+        }
+      },
+
+      getSelectedValues(filterType) {
+        return this.selectedValues[filterType];
+      },
+
+      clearAll() {
+        this.selectedValues = {
+          agencia: ['__ALL__'],
+          pipeline: ['__ALL__'],
+          modelo: ['__ALL__'],
+          tipo: ['__ALL__']
         };
 
-        Object.entries(fields).forEach(([selectId, fieldName]) => {
+        document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+          const filterType = wrapper.dataset.filter;
+          wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = cb.closest('[data-value="__ALL__"]') !== null;
+          });
+          this.updateTriggerText(wrapper, filterType);
+        });
+      }
+    };
+
+    const FilterManager = {
+      buildFilterOptions() {
+        const fields = {
+          agencia: 'agencia',
+          pipeline: 'pipeline',
+          modelo: 'modelo_int_ctc',
+          tipo: 'tipo_solicitud_compra'
+        };
+
+        Object.entries(fields).forEach(([filterType, fieldName]) => {
           const values = this.getUniqueValues(STATE.allRecords, fieldName);
-          this.populateSelect(selectId, values);
+          CustomSelect.populateDropdown(filterType, values);
         });
       },
 
@@ -540,28 +864,12 @@
         );
       },
 
-      populateSelect(selectId, values) {
-        const select = document.getElementById(selectId);
-        const allOption = select.querySelector('option[value="__ALL__"]');
-        select.innerHTML = '';
-        if (allOption) {
-          select.appendChild(allOption);
-        }
-
-        values.forEach(value => {
-          const option = document.createElement('option');
-          option.value = value;
-          option.textContent = value;
-          select.appendChild(option);
-        });
-      },
-
       applyFilters() {
         const filters = {
-          agencia: this.getSelectedValues('filter-agencia'),
-          pipeline: this.getSelectedValues('filter-pipeline'),
-          modelo: this.getSelectedValues('filter-modelo'),
-          tipo: this.getSelectedValues('filter-tipo'),
+          agencia: CustomSelect.getSelectedValues('agencia'),
+          pipeline: CustomSelect.getSelectedValues('pipeline'),
+          modelo: CustomSelect.getSelectedValues('modelo'),
+          tipo: CustomSelect.getSelectedValues('tipo'),
           searchText: document.getElementById('search-text').value.trim().toLowerCase()
         };
 
@@ -611,10 +919,7 @@
       },
 
       clearFilters() {
-        ['filter-agencia', 'filter-pipeline', 'filter-modelo', 'filter-tipo'].forEach(id => {
-          const select = document.getElementById(id);
-          Array.from(select.options).forEach(opt => opt.selected = opt.value === '__ALL__');
-        });
+        CustomSelect.clearAll();
         document.getElementById('search-text').value = '';
         this.applyFilters();
       },
@@ -875,6 +1180,7 @@
     // INICIALIZACIÓN
     // ========================================
     document.addEventListener('DOMContentLoaded', () => {
+      CustomSelect.init();
       initializeEventListeners();
       loadData();
     });
@@ -882,7 +1188,6 @@
 </body>
 
 </html>
-
 
 
 <!-- Código original para reestablecer -->
