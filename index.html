@@ -127,29 +127,35 @@
     <h4>Filtros</h4>
 
     <label for="filter-agencia">Agencia</label>
-    <select id="filter-agencia">
+    <select id="filter-agencia" multiple>
       <option value="__ALL__">— Todas —</option>
     </select>
 
-    <label for="filter-es-cliente" style="margin-top:8px;">
-      <input type="checkbox" id="filter-es-cliente" /> Mostrar sólo "Es cliente" (tiene fecha_entrega)
-    </label>
+    <label for="filter-pipeline">Pipeline</label>
+    <select id="filter-pipeline" multiple>
+      <option value="__ALL__">— Todos —</option>
+    </select>
 
-    <label for="filter-pipeline">Pipeline (multi)</label>
-    <select id="filter-pipeline" multiple></select>
+    <label for="filter-modelo">Modelo de interés CTC</label>
+    <select id="filter-modelo" multiple>
+      <option value="__ALL__">— Todos —</option>
+    </select>
 
-    <label for="filter-modelos">Modelos de interés (multi)</label>
-    <select id="filter-modelos" multiple></select>
+    <label for="filter-tipo">Tipo de solicitud de compra</label>
+    <select id="filter-tipo" multiple>
+      <option value="__ALL__">— Todos —</option>
+    </select>
 
-    <label for="filter-tipo-solicitud">Tipo solicitud compra (multi)</label>
-    <select id="filter-tipo-solicitud" multiple></select>
-
-    <label for="search-text">Buscar texto (dealname, cp)</label>
-    <input id="search-text" type="text" placeholder="Buscar nombre o CP..." />
+    <label for="search-text">Buscar (nombre negocio o código postal)</label>
+    <input id="search-text" type="text" placeholder="Buscar..." />
 
     <div class="controls-row">
       <button id="btnApply">Aplicar</button>
       <button id="btnClear">Limpiar</button>
+    </div>
+    <div class="controls-row">
+      <button id="btnHideAll">Ocultar todos</button>
+      <button id="btnShowAll">Mostrar todos</button>
     </div>
 
     <div class="small" id="count-info">Registros cargados: 0 — Mostrando: 0</div>
@@ -308,54 +314,57 @@
     function buildFilterUI(records) {
       const agenciaSel = document.getElementById('filter-agencia');
       const pipelineSel = document.getElementById('filter-pipeline');
-      const modelosSel = document.getElementById('filter-modelos');
-      const tipoSel = document.getElementById('filter-tipo-solicitud');
+      const modeloSel = document.getElementById('filter-modelo');
+      const tipoSel = document.getElementById('filter-tipo');
 
-      // helper: get unique normalized values from records for a key (split multi-values if needed)
-      function uniqValuesFor(key, splitMulti = false) {
+      function uniqValuesFor(key) {
         const s = new Set();
         records.forEach(r => {
           const v = r[key];
           if (isEmptyVal(v)) return;
-          if (splitMulti) {
-            String(v).split(/[;,]/).map(x => x.trim()).filter(Boolean).forEach(x => s.add(x));
-          } else {
-            s.add(String(v).trim());
-          }
+          s.add(String(v).trim());
         });
         return Array.from(s).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
       }
 
-      // poblar agencias (con opción "Todas")
+      // poblar selects
       agenciaSel.innerHTML = '<option value="__ALL__">— Todas —</option>';
-      const agencias = uniqValuesFor('agencia', false);
-      agencias.forEach(a => agenciaSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`));
+      uniqValuesFor('agencia').forEach(a => agenciaSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`));
 
-      // pipelines (multi)
-      pipelineSel.innerHTML = '';
-      uniqValuesFor('pipeline', true).forEach(v => pipelineSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+      pipelineSel.innerHTML = '<option value="__ALL__">— Todos —</option>';
+      uniqValuesFor('pipeline').forEach(v => pipelineSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
 
-      // modelos (multi)
-      modelosSel.innerHTML = '';
-      uniqValuesFor('modelo_int_ctc', true).forEach(v => modelosSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+      modeloSel.innerHTML = '<option value="__ALL__">— Todos —</option>';
+      uniqValuesFor('modelo_int_ctc').forEach(v => modeloSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
 
-      // tipo solicitud (multi)
-      tipoSel.innerHTML = '';
-      uniqValuesFor('tipo_solicitud_compra', true).forEach(v => tipoSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+      tipoSel.innerHTML = '<option value="__ALL__">— Todos —</option>';
+      uniqValuesFor('tipo_solicitud_compra').forEach(v => tipoSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
 
       document.getElementById('btnApply').addEventListener('click', applyFilters);
       document.getElementById('btnClear').addEventListener('click', () => {
         agenciaSel.value = '__ALL__';
-        (document.getElementById('filter-es-cliente')).checked = false;
+        pipelineSel.value = '__ALL__';
+        modeloSel.value = '__ALL__';
+        tipoSel.value = '__ALL__';
         document.getElementById('search-text').value = '';
-        [pipelineSel, modelosSel, tipoSel].forEach(s => { for (let i = 0; i < s.options.length; i++) s.options[i].selected = false; });
         applyFilters();
       });
 
-      // quick apply when user types search or toggles checkbox (debounced)
-      let debounceTimer = null;
-      document.getElementById('search-text').addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(applyFilters, 350); });
-      document.getElementById('filter-es-cliente').addEventListener('change', applyFilters);
+      document.getElementById('search-text').addEventListener('input', () => {
+        clearTimeout(window._debounceTimer);
+        window._debounceTimer = setTimeout(applyFilters, 350);
+      });
+
+      // Ocultar/mostrar todos los negocios
+      document.getElementById('btnHideAll').addEventListener('click', () => {
+        Object.values(clustersByAgency).forEach(({ group }) => { if (map.hasLayer(group)) map.removeLayer(group); });
+        document.getElementById('count-info').textContent = `Registros cargados: ${recordsOriginal.length} — Mostrando: 0`;
+        document.getElementById('legend').innerHTML = '<div class="small">Todos ocultos</div>';
+      });
+      document.getElementById('btnShowAll').addEventListener('click', () => {
+        renderMarkers(recordsFiltered.length ? recordsFiltered : recordsOriginal);
+        document.getElementById('count-info').textContent = `Registros cargados: ${recordsOriginal.length} — Mostrando: ${recordsFiltered.length || recordsOriginal.length}`;
+      });
     }
 
     // ------------------------
@@ -371,56 +380,27 @@
     // Aplicar filtros y volver a renderizar
     // ------------------------
     function applyFilters() {
-      const agenciaVal = document.getElementById('filter-agencia').value;
-      const esCliente = document.getElementById('filter-es-cliente').checked;
+      const agenciaSel = document.getElementById('filter-agencia');
       const pipelineSel = document.getElementById('filter-pipeline');
-      const modelosSel = document.getElementById('filter-modelos');
-      const tipoSel = document.getElementById('filter-tipo-solicitud');
+      const modeloSel = document.getElementById('filter-modelo');
+      const tipoSel = document.getElementById('filter-tipo');
+      const agenciaVals = getSelectedValues(agenciaSel);
+      const pipelineVals = getSelectedValues(pipelineSel);
+      const modeloVals = getSelectedValues(modeloSel);
+      const tipoVals = getSelectedValues(tipoSel);
       const searchText = (document.getElementById('search-text').value || '').trim().toLowerCase();
 
-      const pipelineVals = getSelectedValues(pipelineSel).map(v => v.toLowerCase());
-      const modelosVals = getSelectedValues(modelosSel).map(v => v.toLowerCase());
-      const tipoVals = getSelectedValues(tipoSel).map(v => v.toLowerCase());
-
       recordsFiltered = recordsOriginal.filter(r => {
-        // lat/long must exist
         if (!isValidLat(parseFloat(r.latitud)) || !isValidLon(parseFloat(r.longitud))) return false;
-
-        // agencia
-        if (agenciaVal && agenciaVal !== '__ALL__') {
-          if (isEmptyVal(r.agencia) || String(r.agencia).trim().toLowerCase() !== agenciaVal.toLowerCase()) return false;
-        }
-
-        // es cliente (fecha_entrega has value)
-        if (esCliente) {
-          if (isEmptyVal(r.fecha_entrega)) return false;
-        }
-
-        // pipeline filter (multi): record.pipeline may be multi like "A;B". Pass if any of selected values matches any token in record.pipeline
-        if (pipelineVals.length) {
-          const recordPipes = isEmptyVal(r.pipeline) ? [] : String(r.pipeline).split(/[;,]/).map(x => x.trim().toLowerCase()).filter(Boolean);
-          if (!pipelineVals.some(v => recordPipes.includes(v))) return false;
-        }
-
-        // modelos filter
-        if (modelosVals.length) {
-          const recordModels = isEmptyVal(r.modelo_int_ctc) ? [] : String(r.modelo_int_ctc).split(/[;,]/).map(x => x.trim().toLowerCase()).filter(Boolean);
-          if (!modelosVals.some(v => recordModels.includes(v))) return false;
-        }
-
-        // tipo solicitud filter
-        if (tipoVals.length) {
-          const recordTipos = isEmptyVal(r.tipo_solicitud_compra) ? [] : String(r.tipo_solicitud_compra).split(/[;,]/).map(x => x.trim().toLowerCase()).filter(Boolean);
-          if (!tipoVals.some(v => recordTipos.includes(v))) return false;
-        }
-
-        // texto global search (dealname or cp)
+        if (!agenciaVals.includes('__ALL__') && !agenciaVals.includes(String(r.agencia).trim())) return false;
+        if (!pipelineVals.includes('__ALL__') && !pipelineVals.includes(String(r.pipeline).trim())) return false;
+        if (!modeloVals.includes('__ALL__') && !modeloVals.includes(String(r.modelo_int_ctc).trim())) return false;
+        if (!tipoVals.includes('__ALL__') && !tipoVals.includes(String(r.tipo_solicitud_compra).trim())) return false;
         if (searchText) {
           const dn = isEmptyVal(r.dealname) ? '' : String(r.dealname).toLowerCase();
-          const cp = isEmptyVal(r.cp) ? '' : String(r.cp).toLowerCase();
+          const cp = isEmptyVal(r.codigo_postal) ? '' : String(r.codigo_postal).toLowerCase();
           if (!dn.includes(searchText) && !cp.includes(searchText)) return false;
         }
-
         return true;
       });
 
