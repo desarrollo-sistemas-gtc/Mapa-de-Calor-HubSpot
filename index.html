@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Mapa - Cluster por Agencia con filtros</title>
+  <title>Mapa - Cluster por Agencia con Filtros</title>
 
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -19,12 +19,16 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     html,
     body {
       height: 100%;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     #map {
@@ -37,46 +41,152 @@
       top: 10px;
       left: 10px;
       z-index: 1200;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      max-width: 320px;
+      background: rgba(255, 255, 255, 0.97);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      max-width: 340px;
       font-size: 13px;
-      overflow: auto;
-      max-height: 80vh;
+      overflow-y: auto;
+      max-height: 85vh;
     }
 
     .controls-panel h4 {
-      margin: 4px 0 8px 0;
-      font-size: 14px;
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: #2c3e50;
+      font-weight: 600;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 8px;
     }
 
-    .controls-panel label {
+    .filter-group {
+      margin-bottom: 14px;
+    }
+
+    .filter-group label {
       display: block;
-      margin-top: 6px;
+      margin-bottom: 5px;
       font-weight: 600;
+      color: #34495e;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .controls-panel select,
-    .controls-panel input[type="text"],
-    .controls-panel button {
+    .controls-panel input[type="text"] {
       width: 100%;
-      box-sizing: border-box;
-      margin-top: 6px;
-      padding: 6px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #bdc3c7;
+      font-size: 13px;
+      transition: border-color 0.2s;
+    }
+
+    .controls-panel select:focus,
+    .controls-panel input[type="text"]:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    select[multiple] {
+      min-height: 100px;
+      padding: 4px;
+    }
+
+    select[multiple] option {
+      padding: 6px 8px;
       border-radius: 4px;
-      border: 1px solid #ccc;
+      margin-bottom: 2px;
+    }
+
+    select[multiple] option:checked {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input {
+      padding-left: 32px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7f8c8d;
+      pointer-events: none;
     }
 
     .controls-row {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    .controls-row button {
-      flex: 1;
+    .btn {
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #ecf0f1;
+      color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+      background: #bdc3c7;
+    }
+
+    .btn-hide {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .btn-show {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    .count-info {
+      margin-top: 12px;
+      padding: 10px;
+      background: #ecf0f1;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #2c3e50;
+      text-align: center;
+    }
+
+    .count-info strong {
+      color: #3498db;
     }
 
     .legend {
@@ -84,38 +194,100 @@
       bottom: 10px;
       right: 10px;
       z-index: 1200;
-      background: white;
-      padding: 8px;
-      border-radius: 6px;
-      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
-      max-height: 200px;
-      overflow: auto;
+      background: rgba(255, 255, 255, 0.97);
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      max-height: 300px;
+      overflow-y: auto;
       font-size: 13px;
+      min-width: 180px;
+    }
+
+    .legend h5 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 6px;
     }
 
     .legend-item {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .legend-item:hover {
+      background: #ecf0f1;
     }
 
     .swatch {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+      flex-shrink: 0;
     }
 
-    .small {
-      font-size: 12px;
+    .legend-empty {
+      color: #7f8c8d;
+      font-style: italic;
+      text-align: center;
+      padding: 10px;
+    }
+
+    /* Scrollbar personalizado */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #ecf0f1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #95a5a6;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #7f8c8d;
+    }
+
+    /* Popup personalizado */
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .leaflet-popup-content {
+      margin: 15px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .popup-title {
+      font-weight: 700;
+      color: #2c3e50;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .popup-field {
+      margin: 4px 0;
       color: #555;
-      margin-top: 6px;
     }
 
-    /* multi select height */
-    select[multiple] {
-      height: 90px;
+    .popup-label {
+      font-weight: 600;
+      color: #7f8c8d;
     }
   </style>
 </head>
@@ -124,375 +296,588 @@
   <div id="map"></div>
 
   <div class="controls-panel" id="controls">
-    <h4>Filtros</h4>
+    <h4>🔍 Filtros de Búsqueda</h4>
 
-    <label for="filter-agencia">Agencia</label>
-    <select id="filter-agencia" multiple>
-      <option value="__ALL__">— Todas —</option>
-    </select>
-
-    <label for="filter-pipeline">Pipeline</label>
-    <select id="filter-pipeline" multiple>
-      <option value="__ALL__">— Todos —</option>
-    </select>
-
-    <label for="filter-modelo">Modelo de interés CTC</label>
-    <select id="filter-modelo" multiple>
-      <option value="__ALL__">— Todos —</option>
-    </select>
-
-    <label for="filter-tipo">Tipo de solicitud de compra</label>
-    <select id="filter-tipo" multiple>
-      <option value="__ALL__">— Todos —</option>
-    </select>
-
-    <label for="search-text">Buscar (nombre negocio o código postal)</label>
-    <input id="search-text" type="text" placeholder="Buscar..." />
-
-    <div class="controls-row">
-      <button id="btnApply">Aplicar</button>
-      <button id="btnClear">Limpiar</button>
-    </div>
-    <div class="controls-row">
-      <button id="btnHideAll">Ocultar todos</button>
-      <button id="btnShowAll">Mostrar todos</button>
+    <div class="filter-group">
+      <label for="filter-agencia">🏢 Agencia</label>
+      <select id="filter-agencia" multiple>
+        <option value="__ALL__" selected>— Todas —</option>
+      </select>
     </div>
 
-    <div class="small" id="count-info">Registros cargados: 0 — Mostrando: 0</div>
+    <div class="filter-group">
+      <label for="filter-pipeline">📊 Pipeline</label>
+      <select id="filter-pipeline" multiple>
+        <option value="__ALL__" selected>— Todos —</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-modelo">🚗 Modelo de Interés CTC</label>
+      <select id="filter-modelo" multiple>
+        <option value="__ALL__" selected>— Todos —</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-tipo">📝 Tipo de Solicitud</label>
+      <select id="filter-tipo" multiple>
+        <option value="__ALL__" selected>— Todos —</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="search-text">🔎 Buscar</label>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input id="search-text" type="text" placeholder="Nombre o código postal..." />
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn btn-primary" id="btnApply">✓ Aplicar</button>
+      <button class="btn btn-secondary" id="btnClear">✗ Limpiar</button>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn btn-hide" id="btnHideAll">👁️ Ocultar</button>
+      <button class="btn btn-show" id="btnShowAll">👁️ Mostrar</button>
+    </div>
+
+    <div class="count-info" id="count-info">
+      <div>Cargados: <strong>0</strong></div>
+      <div>Mostrando: <strong>0</strong></div>
+    </div>
   </div>
 
-  <div class="legend" id="legend"></div>
+  <div class="legend" id="legend">
+    <h5>Agencias</h5>
+    <div class="legend-empty">Cargando datos...</div>
+  </div>
 
   <script>
-    // ------------------------
-    // CONFIG Y UTILIDADES
-    // ------------------------
-    const map = L.map('map').setView([19.4326, -99.1332], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+    // ========================================
+    // CONFIGURACIÓN Y ESTADO GLOBAL
+    // ========================================
+    const CONFIG = {
+      mapCenter: [19.4326, -99.1332],
+      mapZoom: 8,
+      dataFile: 'merged_data.txt',
+      searchDebounce: 350,
+      expectedColumns: [
+        'id', 'dealname', 'agencia', 'codigo_postal', 'pipeline',
+        'cuenta_cliente', 'modelo_int_ctc', 'fecha_entrega', 'origen',
+        'suborigen', 'auto_version_n_pedido', 'tipo_solicitud_compra',
+        'latitud', 'longitud'
+      ]
+    };
 
-    function colorForString(str) {
-      if (!str) str = 'sin';
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        hash = hash & hash;
-      }
-      const h = Math.abs(hash) % 360;
-      return `hsl(${h} 70% 45%)`;
-    }
-    function makeColoredIcon(color, labelText) {
-      const label = labelText ? labelText[0].toUpperCase() : '';
-      const html = `<div style="display:inline-block;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,0.85);box-shadow:0 1px 3px rgba(0,0,0,0.25);text-align:center;line-height:22px;font-weight:700;color:white;font-size:12px;background:${color}">${label}</div>`;
-      return L.divIcon({ html, className: '', iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -11] });
-    }
-    function escapeHtml(text) { if (!text) return ''; return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
-    function isEmptyVal(v) { return v == null || v === '' || String(v).toLowerCase() === 'none'; }
+    const STATE = {
+      allRecords: [],
+      filteredRecords: [],
+      clustersByAgency: {},
+      layerControl: null,
+      allMarkerBounds: L.latLngBounds()
+    };
 
-    // Rango lat/lon
-    function isValidLat(n) { return typeof n === 'number' && !isNaN(n) && n >= -90 && n <= 90; }
-    function isValidLon(n) { return typeof n === 'number' && !isNaN(n) && n >= -180 && n <= 180; }
+    // ========================================
+    // INICIALIZACIÓN DEL MAPA
+    // ========================================
+    const map = L.map('map').setView(CONFIG.mapCenter, CONFIG.mapZoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-    // columnas en el orden que diste
-    const EXPECTED_COLS = ['id', 'dealname', 'agencia', 'codigo_postal', 'pipeline', 'cuenta_cliente', 'modelo_int_ctc', 'fecha_entrega', 'origen', 'suborigen', 'auto_version_n_pedido', 'tipo_solicitud_compra', 'cp', 'latitud', 'longitud'];
+    // ========================================
+    // UTILIDADES
+    // ========================================
+    const Utils = {
+      escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      },
 
-    // ------------------------
-    // Estado global
-    // ------------------------
-    let recordsOriginal = [];   // todos los registros parseados
-    let recordsFiltered = [];   // tras aplicar filtros
-    let clustersByAgency = {};  // { agencia: {group,color} }
-    let overlays = {};
-    let allMarkerBounds = L.latLngBounds();
+      isEmptyVal(v) {
+        return v == null || v === '' || String(v).toLowerCase() === 'none';
+      },
 
-    // ------------------------
-    // Cargar archivo (merge_data.txt)
-    // ------------------------
-    const cacheBuster = new Date().getTime();
-    const sourceFile = `merged_data.txt?v=${cacheBuster}`; // Cambia ruta si es necesario
+      isValidLat(n) {
+        return typeof n === 'number' && !isNaN(n) && n >= -90 && n <= 90;
+      },
 
-    fetch(sourceFile)
-      .then(r => { if (!r.ok) throw new Error('Error al leer ' + sourceFile + ' : ' + r.status); return r.text(); })
-      .then(text => {
-        recordsOriginal = parseTextToRecords(text);
-        buildFilterUI(recordsOriginal);
-        applyFilters(); // render inicial sin filtros (todos)
-      })
-      .catch(err => { console.error('Error cargando datos:', err); alert('Error al cargar datos. Revisa consola.'); });
+      isValidLon(n) {
+        return typeof n === 'number' && !isNaN(n) && n >= -180 && n <= 180;
+      },
 
-    // ------------------------
-    // Parseo: convertir texto en array de objetos con llaves esperadas
-    // ------------------------
-    function parseTextToRecords(text) {
-      const lines = text.split(/\r?\n/);
-      const out = [];
-      for (const raw of lines) {
-        const line = raw.trim();
-        if (!line) continue;
-        const parts = line.split('|').map(p => p === '' ? null : p);
-
-        // Si coincide con columnas completas (longitud >= EXPECTED_COLS.length) hago asignación por índice
-        if (parts.length >= EXPECTED_COLS.length) {
-          const obj = {};
-          for (let i = 0; i < EXPECTED_COLS.length; i++) {
-            obj[EXPECTED_COLS[i]] = parts[i] == null ? null : String(parts[i]).trim();
-          }
-          // lat/long convertir a number si posible
-          obj.latitud = (obj.latitud != null && obj.latitud !== '') ? parseFloat(String(obj.latitud).replace(',', '.')) : null;
-          obj.longitud = (obj.longitud != null && obj.longitud !== '') ? parseFloat(String(obj.longitud).replace(',', '.')) : null;
-
-          // transformar 'None' a null y normalizar fecha
-          for (const k in obj) { if (obj[k] != null && String(obj[k]).toLowerCase() === 'none') obj[k] = null; }
-          out.push(obj);
-          continue;
+      colorForString(str) {
+        if (!str) str = 'sin';
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          hash = str.charCodeAt(i) + ((hash << 5) - hash);
         }
+        const h = Math.abs(hash) % 360;
+        const s = 65 + (Math.abs(hash) % 15);
+        const l = 45 + (Math.abs(hash) % 10);
+        return `hsl(${h}, ${s}%, ${l}%)`;
+      },
 
-        // Fallback robusto (buscar lat/lon numéricos en la línea)
-        const numericCandidates = parts.map((p, idx) => {
-          const v = p == null ? NaN : parseFloat(String(p).replace(',', '.'));
-          return { idx, raw: p, value: v, isLat: isValidLat(v), isLon: isValidLon(v) };
-        }).filter(x => !isNaN(x.value));
-
-        let chosenLat = null, chosenLon = null;
-        if (numericCandidates.length >= 2) {
-          for (let i = numericCandidates.length - 2; i >= 0; i--) {
-            const a = numericCandidates[i], b = numericCandidates[i + 1];
-            if (isValidLat(a.value) && isValidLon(b.value)) { chosenLat = a.value; chosenLon = b.value; break; }
-          }
-          if (chosenLat == null) {
-            const latC = numericCandidates.filter(c => c.isLat);
-            const lonC = numericCandidates.filter(c => c.isLon);
-            if (latC.length && lonC.length) {
-              for (let i = latC.length - 1; i >= 0; i--) {
-                for (let j = lonC.length - 1; j >= 0; j--) {
-                  if (latC[i].idx < lonC[j].idx) { chosenLat = latC[i].value; chosenLon = lonC[j].value; break; }
-                }
-                if (chosenLat != null) break;
-              }
-            }
-          }
-        }
-        if (chosenLat == null || chosenLon == null) {
-          console.warn('Línea sin lat/lon válidos (omitida):', line);
-          continue;
-        }
-
-        // Construir objeto con algunos campos por posición aproximada
-        const obj = {
-          id: parts[0] || null, dealname: parts[1] || null, agencia: null,
-          codigo_postal: null, pipeline: null, cuenta_cliente: null,
-          modelo_int_ctc: null, fecha_entrega: null, origen: null, suborigen: null,
-          auto_version_n_pedido: null, tipo_solicitud_compra: null, cp: null,
-          latitud: chosenLat, longitud: chosenLon
-        };
-
-        // intentemos rellenar agencia y cp buscando tokens que no sean numéricos y que parezcan CP
-        // buscar cp de 4-5 digitos
-        const postalToken = parts.find(p => p && /^\d{4,5}$/.test(String(p).trim()));
-        if (postalToken) obj.codigo_postal = String(postalToken).trim();
-
-        // agencia: primer token no numérico entre indices 2..(index of postal or index of first coord)
-        const coordIdx = parts.map((p, i) => ({ i, v: p })).filter(x => {
-          const v = x.v == null ? NaN : parseFloat(String(x.v).replace(',', '.'));
-          return isValidLat(v) || isValidLon(v);
-        }).map(x => x.i).sort((a, b) => a - b)[0] ?? parts.length - 1;
-
-        for (let i = 2; i < Math.min(coordIdx, parts.length); i++) {
-          const t = parts[i];
-          if (t == null) continue;
-          if (!/^\s*\d+\s*$/.test(String(t))) { obj.agencia = String(t).trim(); break; }
-        }
-
-        out.push(obj);
-      } // end for lines
-      console.info('Registros parseados:', out.length);
-      return out;
-    }
-
-    // ------------------------
-    // Construir UI de filtros (llenar selects con valores únicos)
-    // ------------------------
-    function buildFilterUI(records) {
-      const agenciaSel = document.getElementById('filter-agencia');
-      const pipelineSel = document.getElementById('filter-pipeline');
-      const modeloSel = document.getElementById('filter-modelo');
-      const tipoSel = document.getElementById('filter-tipo');
-
-      function uniqValuesFor(key) {
-        const s = new Set();
-        records.forEach(r => {
-          const v = r[key];
-          if (isEmptyVal(v)) return;
-          s.add(String(v).trim());
+      makeColoredIcon(color, labelText) {
+        const label = labelText ? labelText[0].toUpperCase() : '';
+        const html = `
+          <div style="
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            text-align: center;
+            line-height: 24px;
+            font-weight: 700;
+            color: white;
+            font-size: 12px;
+            background: ${color};
+          ">${label}</div>
+        `;
+        return L.divIcon({
+          html,
+          className: '',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -12]
         });
-        return Array.from(s).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
       }
+    };
 
-      // poblar selects
-      agenciaSel.innerHTML = '<option value="__ALL__">— Todas —</option>';
-      uniqValuesFor('agencia').forEach(a => agenciaSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`));
+    // ========================================
+    // PARSER DE DATOS
+    // ========================================
+    const DataParser = {
+      parse(text) {
+        const lines = text.split(/\r?\n/).filter(line => line.trim());
+        const records = [];
 
-      pipelineSel.innerHTML = '<option value="__ALL__">— Todos —</option>';
-      uniqValuesFor('pipeline').forEach(v => pipelineSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+        for (const line of lines) {
+          const parts = line.split('|').map(p => p.trim() || null);
 
-      modeloSel.innerHTML = '<option value="__ALL__">— Todos —</option>';
-      uniqValuesFor('modelo_int_ctc').forEach(v => modeloSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+          if (parts.length < CONFIG.expectedColumns.length) {
+            console.warn('Línea incompleta:', line);
+            continue;
+          }
 
-      tipoSel.innerHTML = '<option value="__ALL__">— Todos —</option>';
-      uniqValuesFor('tipo_solicitud_compra').forEach(v => tipoSel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+          const record = {};
+          CONFIG.expectedColumns.forEach((col, i) => {
+            record[col] = parts[i];
+          });
 
-      document.getElementById('btnApply').addEventListener('click', applyFilters);
-      document.getElementById('btnClear').addEventListener('click', () => {
-        agenciaSel.value = '__ALL__';
-        pipelineSel.value = '__ALL__';
-        modeloSel.value = '__ALL__';
-        tipoSel.value = '__ALL__';
-        document.getElementById('search-text').value = '';
-        applyFilters();
-      });
+          // Convertir latitud/longitud a número
+          record.latitud = this.parseCoordinate(record.latitud);
+          record.longitud = this.parseCoordinate(record.longitud);
 
-      document.getElementById('search-text').addEventListener('input', () => {
-        clearTimeout(window._debounceTimer);
-        window._debounceTimer = setTimeout(applyFilters, 350);
-      });
+          // Validar coordenadas
+          if (!Utils.isValidLat(record.latitud) || !Utils.isValidLon(record.longitud)) {
+            console.warn('Coordenadas inválidas:', line);
+            continue;
+          }
 
-      // Ocultar/mostrar todos los negocios
-      document.getElementById('btnHideAll').addEventListener('click', () => {
-        Object.values(clustersByAgency).forEach(({ group }) => { if (map.hasLayer(group)) map.removeLayer(group); });
-        document.getElementById('count-info').textContent = `Registros cargados: ${recordsOriginal.length} — Mostrando: 0`;
-        document.getElementById('legend').innerHTML = '<div class="small">Todos ocultos</div>';
-      });
-      document.getElementById('btnShowAll').addEventListener('click', () => {
-        renderMarkers(recordsFiltered.length ? recordsFiltered : recordsOriginal);
-        document.getElementById('count-info').textContent = `Registros cargados: ${recordsOriginal.length} — Mostrando: ${recordsFiltered.length || recordsOriginal.length}`;
-      });
-    }
-
-    // ------------------------
-    // Obtener valores seleccionados de un <select multiple>
-    // ------------------------
-    function getSelectedValues(selectEl) {
-      const res = [];
-      for (const opt of selectEl.options) if (opt.selected) res.push(opt.value);
-      return res;
-    }
-
-    // ------------------------
-    // Aplicar filtros y volver a renderizar
-    // ------------------------
-    function applyFilters() {
-      const agenciaSel = document.getElementById('filter-agencia');
-      const pipelineSel = document.getElementById('filter-pipeline');
-      const modeloSel = document.getElementById('filter-modelo');
-      const tipoSel = document.getElementById('filter-tipo');
-      const agenciaVals = getSelectedValues(agenciaSel);
-      const pipelineVals = getSelectedValues(pipelineSel);
-      const modeloVals = getSelectedValues(modeloSel);
-      const tipoVals = getSelectedValues(tipoSel);
-      const searchText = (document.getElementById('search-text').value || '').trim().toLowerCase();
-
-      recordsFiltered = recordsOriginal.filter(r => {
-        if (!isValidLat(parseFloat(r.latitud)) || !isValidLon(parseFloat(r.longitud))) return false;
-        if (!agenciaVals.includes('__ALL__') && !agenciaVals.includes(String(r.agencia).trim())) return false;
-        if (!pipelineVals.includes('__ALL__') && !pipelineVals.includes(String(r.pipeline).trim())) return false;
-        if (!modeloVals.includes('__ALL__') && !modeloVals.includes(String(r.modelo_int_ctc).trim())) return false;
-        if (!tipoVals.includes('__ALL__') && !tipoVals.includes(String(r.tipo_solicitud_compra).trim())) return false;
-        if (searchText) {
-          const dn = isEmptyVal(r.dealname) ? '' : String(r.dealname).toLowerCase();
-          const cp = isEmptyVal(r.codigo_postal) ? '' : String(r.codigo_postal).toLowerCase();
-          if (!dn.includes(searchText) && !cp.includes(searchText)) return false;
-        }
-        return true;
-      });
-
-      renderMarkers(recordsFiltered);
-      document.getElementById('count-info').textContent = `Registros cargados: ${recordsOriginal.length} — Mostrando: ${recordsFiltered.length}`;
-    }
-
-    // ------------------------
-    // Renderizar marcadores agrupados por agencia
-    // ------------------------
-    function clearClusters() {
-      // quitar grupos viejos del mapa
-      Object.keys(clustersByAgency).forEach(ag => {
-        const g = clustersByAgency[ag].group;
-        if (map.hasLayer(g)) map.removeLayer(g);
-      });
-      clustersByAgency = {};
-      overlays = {};
-      allMarkerBounds = L.latLngBounds();
-      // quitar control de capas previo (si existe) => no directo API; recreate control by keeping reference.
-      // Simpler: remove existing layer control DOM node si existiera
-      const existingControls = document.querySelectorAll('.leaflet-control-layers');
-      existingControls.forEach(n => n.remove());
-    }
-
-    function renderMarkers(records) {
-      clearClusters();
-
-      // agrupar por agencia al tiempo que creamos clusters
-      for (const r of records) {
-        const agenciaKey = isEmptyVal(r.agencia) ? 'Sin Agencia' : String(r.agencia).trim();
-        if (!clustersByAgency[agenciaKey]) {
-          const color = colorForString(agenciaKey);
-          const group = L.markerClusterGroup({
-            chunkedLoading: true, spiderfyOnMaxZoom: true, showCoverageOnHover: false,
-            iconCreateFunction: (cluster) => {
-              const count = cluster.getChildCount();
-              const size = count < 10 ? 36 : (count < 100 ? 44 : 52);
-              const html = `<div style="width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color};color:white;font-weight:700;box-shadow:0 0 6px rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.7)">${count}</div>`;
-              return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+          // Normalizar valores 'None' a null
+          Object.keys(record).forEach(key => {
+            if (record[key] && String(record[key]).toLowerCase() === 'none') {
+              record[key] = null;
             }
           });
-          clustersByAgency[agenciaKey] = { group, color };
-          overlays[agenciaKey] = group;
+
+          records.push(record);
         }
 
-        const lat = parseFloat(r.latitud);
-        const lon = parseFloat(r.longitud);
-        if (!isValidLat(lat) || !isValidLon(lon)) continue;
+        console.info(`✓ Registros parseados exitosamente: ${records.length}`);
+        return records;
+      },
 
-        const { group, color } = clustersByAgency[agenciaKey];
-        const icon = makeColoredIcon(color, agenciaKey);
-        const popup = `<strong>${escapeHtml(r.dealname || '')}</strong><br/>Agencia: ${escapeHtml(agenciaKey)}<br/>CP: ${escapeHtml(r.cp || r.codigo_postal || '')}<br/>Modelo: ${escapeHtml(r.modelo_int_ctc || '')}<br/>Pipeline: ${escapeHtml(r.pipeline || '')}`;
+      parseCoordinate(value) {
+        if (!value) return null;
+        const parsed = parseFloat(String(value).replace(',', '.'));
+        return isNaN(parsed) ? null : parsed;
+      }
+    };
+
+    // ========================================
+    // GESTIÓN DE FILTROS
+    // ========================================
+    const FilterManager = {
+      getSelectedValues(selectId) {
+        const select = document.getElementById(selectId);
+        const values = Array.from(select.selectedOptions).map(opt => opt.value);
+        return values;
+      },
+
+      buildFilterOptions() {
+        const fields = {
+          'filter-agencia': 'agencia',
+          'filter-pipeline': 'pipeline',
+          'filter-modelo': 'modelo_int_ctc',
+          'filter-tipo': 'tipo_solicitud_compra'
+        };
+
+        Object.entries(fields).forEach(([selectId, fieldName]) => {
+          const values = this.getUniqueValues(STATE.allRecords, fieldName);
+          this.populateSelect(selectId, values);
+        });
+      },
+
+      getUniqueValues(records, fieldName) {
+        const uniqueSet = new Set();
+        records.forEach(record => {
+          const value = record[fieldName];
+          if (!Utils.isEmptyVal(value)) {
+            uniqueSet.add(String(value).trim());
+          }
+        });
+        return Array.from(uniqueSet).sort((a, b) =>
+          a.localeCompare(b, 'es', { sensitivity: 'base' })
+        );
+      },
+
+      populateSelect(selectId, values) {
+        const select = document.getElementById(selectId);
+        const allOption = select.querySelector('option[value="__ALL__"]');
+        select.innerHTML = '';
+        if (allOption) {
+          select.appendChild(allOption);
+        }
+
+        values.forEach(value => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = value;
+          select.appendChild(option);
+        });
+      },
+
+      applyFilters() {
+        const filters = {
+          agencia: this.getSelectedValues('filter-agencia'),
+          pipeline: this.getSelectedValues('filter-pipeline'),
+          modelo: this.getSelectedValues('filter-modelo'),
+          tipo: this.getSelectedValues('filter-tipo'),
+          searchText: document.getElementById('search-text').value.trim().toLowerCase()
+        };
+
+        STATE.filteredRecords = STATE.allRecords.filter(record => {
+          // Filtro de agencia
+          if (!filters.agencia.includes('__ALL__')) {
+            if (!filters.agencia.includes(String(record.agencia || '').trim())) {
+              return false;
+            }
+          }
+
+          // Filtro de pipeline
+          if (!filters.pipeline.includes('__ALL__')) {
+            if (!filters.pipeline.includes(String(record.pipeline || '').trim())) {
+              return false;
+            }
+          }
+
+          // Filtro de modelo
+          if (!filters.modelo.includes('__ALL__')) {
+            if (!filters.modelo.includes(String(record.modelo_int_ctc || '').trim())) {
+              return false;
+            }
+          }
+
+          // Filtro de tipo
+          if (!filters.tipo.includes('__ALL__')) {
+            if (!filters.tipo.includes(String(record.tipo_solicitud_compra || '').trim())) {
+              return false;
+            }
+          }
+
+          // Filtro de búsqueda
+          if (filters.searchText) {
+            const dealname = String(record.dealname || '').toLowerCase();
+            const postal = String(record.codigo_postal || '').toLowerCase();
+            if (!dealname.includes(filters.searchText) && !postal.includes(filters.searchText)) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
+        MapRenderer.render(STATE.filteredRecords);
+        this.updateCountInfo();
+      },
+
+      clearFilters() {
+        ['filter-agencia', 'filter-pipeline', 'filter-modelo', 'filter-tipo'].forEach(id => {
+          const select = document.getElementById(id);
+          Array.from(select.options).forEach(opt => opt.selected = opt.value === '__ALL__');
+        });
+        document.getElementById('search-text').value = '';
+        this.applyFilters();
+      },
+
+      updateCountInfo() {
+        const infoDiv = document.getElementById('count-info');
+        infoDiv.innerHTML = `
+          <div>Cargados: <strong>${STATE.allRecords.length}</strong></div>
+          <div>Mostrando: <strong>${STATE.filteredRecords.length}</strong></div>
+        `;
+      }
+    };
+
+    // ========================================
+    // RENDERIZADO DEL MAPA
+    // ========================================
+    const MapRenderer = {
+      clearClusters() {
+        Object.values(STATE.clustersByAgency).forEach(({ group }) => {
+          if (map.hasLayer(group)) {
+            map.removeLayer(group);
+          }
+        });
+
+        if (STATE.layerControl) {
+          map.removeControl(STATE.layerControl);
+          STATE.layerControl = null;
+        }
+
+        STATE.clustersByAgency = {};
+        STATE.allMarkerBounds = L.latLngBounds();
+      },
+
+      render(records) {
+        this.clearClusters();
+
+        // Agrupar por agencia
+        records.forEach(record => {
+          const agenciaKey = Utils.isEmptyVal(record.agencia)
+            ? 'Sin Agencia'
+            : String(record.agencia).trim();
+
+          if (!STATE.clustersByAgency[agenciaKey]) {
+            this.createClusterGroup(agenciaKey);
+          }
+
+          this.addMarkerToCluster(record, agenciaKey);
+        });
+
+        // Agregar clusters al mapa
+        const overlays = {};
+        Object.entries(STATE.clustersByAgency).forEach(([agencia, { group }]) => {
+          group.addTo(map);
+          overlays[agencia] = group;
+        });
+
+        // Control de capas
+        if (Object.keys(overlays).length > 0) {
+          STATE.layerControl = L.control.layers(null, overlays, {
+            collapsed: false,
+            position: 'topright'
+          }).addTo(map);
+        }
+
+        // Ajustar vista
+        if (STATE.allMarkerBounds.isValid()) {
+          map.fitBounds(STATE.allMarkerBounds, { padding: [50, 50] });
+        }
+
+        this.updateLegend();
+      },
+
+      createClusterGroup(agenciaKey) {
+        const color = Utils.colorForString(agenciaKey);
+        const group = L.markerClusterGroup({
+          chunkedLoading: true,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          maxClusterRadius: 60,
+          iconCreateFunction: (cluster) => {
+            const count = cluster.getChildCount();
+            const size = count < 10 ? 40 : (count < 100 ? 50 : 60);
+            const fontSize = count < 10 ? 12 : (count < 100 ? 14 : 16);
+
+            const html = `
+              <div style="
+                width: ${size}px;
+                height: ${size}px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: ${color};
+                color: white;
+                font-weight: 700;
+                font-size: ${fontSize}px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.4);
+                border: 3px solid white;
+              ">${count}</div>
+            `;
+
+            return L.divIcon({
+              html,
+              className: '',
+              iconSize: [size, size],
+              iconAnchor: [size / 2, size / 2]
+            });
+          }
+        });
+
+        STATE.clustersByAgency[agenciaKey] = { group, color };
+      },
+
+      addMarkerToCluster(record, agenciaKey) {
+        const { group, color } = STATE.clustersByAgency[agenciaKey];
+        const lat = record.latitud;
+        const lon = record.longitud;
+
+        const icon = Utils.makeColoredIcon(color, agenciaKey);
+        const popup = this.createPopupContent(record, agenciaKey);
         const marker = L.marker([lat, lon], { icon }).bindPopup(popup);
+
         group.addLayer(marker);
-        allMarkerBounds.extend([lat, lon]);
-      }
+        STATE.allMarkerBounds.extend([lat, lon]);
+      },
 
-      // añadir grupos según default (todos por defecto)
-      Object.keys(clustersByAgency).forEach(ag => {
-        const { group } = clustersByAgency[ag];
-        group.addTo(map);
+      createPopupContent(record, agenciaKey) {
+        return `
+          <div class="popup-title">${Utils.escapeHtml(record.dealname || 'Sin nombre')}</div>
+          <div class="popup-field">
+            <span class="popup-label">Agencia:</span> ${Utils.escapeHtml(agenciaKey)}
+          </div>
+          <div class="popup-field">
+            <span class="popup-label">Código Postal:</span> ${Utils.escapeHtml(record.codigo_postal || 'N/A')}
+          </div>
+          <div class="popup-field">
+            <span class="popup-label">Modelo:</span> ${Utils.escapeHtml(record.modelo_int_ctc || 'N/A')}
+          </div>
+          <div class="popup-field">
+            <span class="popup-label">Pipeline:</span> ${Utils.escapeHtml(record.pipeline || 'N/A')}
+          </div>
+          <div class="popup-field">
+            <span class="popup-label">Tipo:</span> ${Utils.escapeHtml(record.tipo_solicitud_compra || 'N/A')}
+          </div>
+        `;
+      },
+
+      updateLegend() {
+        const legendDiv = document.getElementById('legend');
+        const agencies = Object.keys(STATE.clustersByAgency).sort((a, b) =>
+          a.localeCompare(b, 'es', { sensitivity: 'base' })
+        );
+
+        if (agencies.length === 0) {
+          legendDiv.innerHTML = '<h5>Agencias</h5><div class="legend-empty">No hay datos visibles</div>';
+          return;
+        }
+
+        let html = '<h5>Agencias</h5>';
+        agencies.forEach(agencia => {
+          const color = STATE.clustersByAgency[agencia].color;
+          html += `
+            <div class="legend-item">
+              <div class="swatch" style="background: ${color}"></div>
+              <div>${Utils.escapeHtml(agencia)}</div>
+            </div>
+          `;
+        });
+
+        legendDiv.innerHTML = html;
+      },
+
+      hideAll() {
+        Object.values(STATE.clustersByAgency).forEach(({ group }) => {
+          if (map.hasLayer(group)) {
+            map.removeLayer(group);
+          }
+        });
+        FilterManager.updateCountInfo();
+        document.getElementById('legend').innerHTML = '<h5>Agencias</h5><div class="legend-empty">Todos ocultos</div>';
+      },
+
+      showAll() {
+        Object.values(STATE.clustersByAgency).forEach(({ group }) => {
+          if (!map.hasLayer(group)) {
+            group.addTo(map);
+          }
+        });
+        FilterManager.updateCountInfo();
+        this.updateLegend();
+      }
+    };
+
+    // ========================================
+    // EVENT LISTENERS
+    // ========================================
+    function initializeEventListeners() {
+      document.getElementById('btnApply').addEventListener('click', () => {
+        FilterManager.applyFilters();
       });
 
-      // añadir control capas (recrear)
-      const overlaysForControl = {}; Object.keys(overlays).forEach(k => overlaysForControl[k] = overlays[k]);
-      L.control.layers(null, overlaysForControl, { collapsed: false, position: 'topright' }).addTo(map);
+      document.getElementById('btnClear').addEventListener('click', () => {
+        FilterManager.clearFilters();
+      });
 
-      // ajustar vista si hay puntos
-      if (allMarkerBounds.isValid()) {
-        map.fitBounds(allMarkerBounds, { padding: [40, 40] });
-      }
-      // reconstruir leyenda
-      buildLegend();
-    }
+      document.getElementById('btnHideAll').addEventListener('click', () => {
+        MapRenderer.hideAll();
+      });
 
-    // ------------------------
-    // Leyenda simple
-    // ------------------------
-    function buildLegend() {
-      const legendEl = document.getElementById('legend');
-      legendEl.innerHTML = '';
-      const agencies = Object.keys(clustersByAgency).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-      if (agencies.length === 0) { legendEl.innerHTML = '<div class="small">No hay agencias visibles</div>'; return; }
-      agencies.forEach(a => {
-        const color = clustersByAgency[a].color || '#999';
-        const node = document.createElement('div'); node.className = 'legend-item';
-        node.innerHTML = `<div class="swatch" style="background:${color}"></div><div>${escapeHtml(a)}</div>`;
-        legendEl.appendChild(node);
+      document.getElementById('btnShowAll').addEventListener('click', () => {
+        MapRenderer.showAll();
+      });
+
+      let searchTimeout;
+      document.getElementById('search-text').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          FilterManager.applyFilters();
+        }, CONFIG.searchDebounce);
+      });
+
+      // Permitir aplicar con Enter
+      document.getElementById('search-text').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          clearTimeout(searchTimeout);
+          FilterManager.applyFilters();
+        }
       });
     }
 
+    // ========================================
+    // CARGA DE DATOS
+    // ========================================
+    async function loadData() {
+      try {
+        const cacheBuster = new Date().getTime();
+        const response = await fetch(`${CONFIG.dataFile}?v=${cacheBuster}`);
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const text = await response.text();
+        STATE.allRecords = DataParser.parse(text);
+        STATE.filteredRecords = STATE.allRecords;
+
+        FilterManager.buildFilterOptions();
+        FilterManager.applyFilters();
+
+        console.info('✓ Datos cargados exitosamente');
+      } catch (error) {
+        console.error('❌ Error al cargar datos:', error);
+        alert('Error al cargar los datos. Por favor, verifica la consola para más detalles.');
+      }
+    }
+
+    // ========================================
+    // INICIALIZACIÓN
+    // ========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeEventListeners();
+      loadData();
+    });
   </script>
 </body>
 
