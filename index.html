@@ -454,6 +454,12 @@
       </div>
     </div>
 
+      <div class="filter-group">
+        <label>
+          <input type="checkbox" id="filter-cuenta-cliente" /> Mostrar Clientes (cuenta cliente existente)
+        </label>
+      </div>
+
     <div class="controls-row">
       <button class="btn btn-primary" id="btnApply">✓ Aplicar</button>
       <button class="btn btn-secondary" id="btnClear">✗ Limpiar</button>
@@ -490,6 +496,7 @@
         'suborigen', 'auto_version_n_pedido', 'tipo_solicitud_compra',
         'latitud', 'longitud'
       ]
+          , cuentaCliente: document.getElementById('filter-cuenta-cliente').checked
     };
 
     const STATE = {
@@ -512,26 +519,22 @@
     // UTILIDADES
     // ========================================
     const Utils = {
-      escapeHtml(text) {
+      escapeHtml: function(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
       },
-
-      isEmptyVal(v) {
+      isEmptyVal: function(v) {
         return v == null || v === '' || String(v).toLowerCase() === 'none';
       },
-
-      isValidLat(n) {
+      isValidLat: function(n) {
         return typeof n === 'number' && !isNaN(n) && n >= -90 && n <= 90;
       },
-
-      isValidLon(n) {
+      isValidLon: function(n) {
         return typeof n === 'number' && !isNaN(n) && n >= -180 && n <= 180;
       },
-
-      colorForString(str) {
+      colorForString: function(str) {
         if (!str) str = 'sin';
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -542,8 +545,7 @@
         const l = 45 + (Math.abs(hash) % 10);
         return `hsl(${h}, ${s}%, ${l}%)`;
       },
-
-      makeColoredIcon(color, labelText) {
+      makeColoredIcon: function(color, labelText) {
         const label = labelText ? labelText[0].toUpperCase() : '';
         const html = `
           <div style="
@@ -562,7 +564,7 @@
           ">${label}</div>
         `;
         return L.divIcon({
-          html,
+          html: html,
           className: '',
           iconSize: [24, 24],
           iconAnchor: [12, 12],
@@ -870,7 +872,8 @@
           pipeline: CustomSelect.getSelectedValues('pipeline'),
           modelo: CustomSelect.getSelectedValues('modelo'),
           tipo: CustomSelect.getSelectedValues('tipo'),
-          searchText: document.getElementById('search-text').value.trim().toLowerCase()
+          searchText: document.getElementById('search-text').value.trim().toLowerCase(),
+          cuentaCliente: document.getElementById('filter-cuenta-cliente').checked
         };
 
         STATE.filteredRecords = STATE.allRecords.filter(record => {
@@ -907,6 +910,13 @@
             const dealname = String(record.dealname || '').toLowerCase();
             const postal = String(record.codigo_postal || '').toLowerCase();
             if (!dealname.includes(filters.searchText) && !postal.includes(filters.searchText)) {
+              return false;
+            }
+          }
+
+          // Filtro de cuenta_cliente
+          if (filters.cuentaCliente) {
+            if (!record.cuenta_cliente || String(record.cuenta_cliente).toLowerCase() === 'none') {
               return false;
             }
           }
@@ -1148,6 +1158,11 @@
           FilterManager.applyFilters();
         }
       });
+
+        // Filtro cuenta_cliente
+        document.getElementById('filter-cuenta-cliente').addEventListener('change', () => {
+          FilterManager.applyFilters();
+        });
     }
 
     // ========================================

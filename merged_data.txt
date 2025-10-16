@@ -420,7 +420,7 @@
 13785539868|JOSE ZARATE GONZALEZ - Nuevo negocio|Lomas|78320|Nissan - Pipeline Piso Nuevos|None|None|2023-07-12|None|None|VERSA ADVANCE MT|Banco autorizado|22.1460289|-100.9609879
 13785546065|Hui Chen|Tlalpan|03810|Nissan - Pipeline Piso Seminuevo|None|None|2023-06-19|None|None|None|None|19.3936949|-99.1767501
 13785546536|JORGE AUGUSTO CORTES DUAJUARTE|Lomas|78140|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|NP300 CHASIS TM AC|Credinissan|22.1751774|-100.9940596
-13789940296|GERARDO GONZALEZ CHIA - Nuevo negocio|Carretera 57|79603|Nissan - Pipeline Piso Nuevos|None|None|2023-07-24|None|None|Frontier Platinum LE Diesel 4X4 TA|Credinissan|32.4529482|-99.7739906
+13789940296|GERARDO GONZALEZ CHIA - Nuevo negocio|Carretera 57|79603|Nissan - Pipeline Piso Nuevos|None|None|2023-07-24|None|None|Frontier Platinum LE Diesel 4X4 TA|Credinissan|21.987360379495374|-100.17457585335362
 13787757732|MARCOS MARTIN GUIZAR BERMUDEZ - Nuevo negocio|Carretera 57|78421|Nissan - Pipeline Piso Seminuevo|None|None|2023-06-29|None|None|NP300 CHASIS TM AC|Contado|22.0953986|-100.8766099
 13793776702|Jorge Aguirre / JORGE ALFONSO AGUIRRE FALCON|Centromax|37295|Nissan - Pipeline Digital Nuevo|0.0|VERSA; SEMINUEVOS|2025-01-07|None|Formulario|V-DRIVE T/M A/C AUDIO|Credinissan|21.0979407|-101.5947318
 13795928653|MOISES ULISES HERNANDEZ GARCIA|Carretera 57|78388|Nissan - Pipeline Digital Nuevo|None|FRONTIER|2023-07-27|None|Messenger|Frontier PRO-4x 4X4 TA|Banco autorizado|22.1294798|-100.9640321
@@ -837,7 +837,7 @@
 14530272653|MARIANA GARCIA LOPEZ |Nava|78385|Nissan - Pipeline Digital Nuevo|None|FRONTIER|2023-09-07|None|None|Frontier SE TM|Credinissan|22.1148118|-100.9459367
 14529644851|Jose GuadalupeRosas Medina|Forum|37357|Nissan - Pipeline Digital Nuevo|None|SEMINUEVOS|2023-09-13|None|Messenger|V-DRIVE T/M A/C AUDIO|Credinissan|21.1482964|-101.7559713
 14530314866|HUGO VARGAS SAN PEDRO - Nuevo negocio|Carranza|54750|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|V-DRIVE T/M A/C|Contado|19.6472464|-99.2001973
-14531369487|MIGUEL ANGEL AVILA BELTRAN|Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|2023-08-09|None|None|V-DRIVE T/M A/C AUDIO|Credinissan|30.2680493|-97.7470489
+14531369487|MIGUEL ANGEL AVILA BELTRAN|Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|2023-08-09|None|None|V-DRIVE T/M A/C AUDIO|Credinissan|23.669058574805522|-100.64920886962224
 14531496359|SERGIO OSTOS|Crossing|01090|Nissan - Pipeline Piso Nuevos|None|None|2023-08-21|None|None|KICKS ADVANCE CVT NEGRO|Contado|19.3372931|-99.1962583
 14531677185|JONATHAN FELIPE ESCALANTE PADILLA|Matehuala|78700|Nissan - Pipeline Piso Nuevos|None|None|2023-09-20|None|None|Frontier DC Diesel 4X4 TM|Credito casa|23.6784792|-100.7044563
 14532421153|MARGARITA NOYOLA GAMEZ - Nuevo negocio|Nava|78430|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|V-DRIVE T/M A/C AUDIO|Credinissan|22.1894457|-100.9326593
@@ -3548,7 +3548,7 @@
 16497072163|Juan enrique Infante granja|Carranza|78433|Nissan - Pipeline Piso Nuevos|None|None|2023-12-21|None|None|VERSA SENSE TM|Contado|22.1836132|-100.9480603
 16497281025|ROGELIO ARCOS MORALES|Rioverde|79650|Nissan - Pipeline Piso Nuevos|None|None|2024-01-02|None|None|SENTRA ADVANCE T/M|Credinissan|21.944366|-100.0213211
 16497332491|J Refugio Macias Solís|Forum|36404|Nissan - Pipeline Piso Nuevos|None|None|2023-12-15|None|None|None|None|21.0198127|-101.8739907
-16497512538|GIOVANNI ARREDONDO HERNANDEZ|Rioverde|79605|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|SENTRA ADVANCE CVT|Credinissan|32.4529482|-99.7739906
+16497512538|GIOVANNI ARREDONDO HERNANDEZ|Rioverde|79605|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|SENTRA ADVANCE CVT|Credinissan|21.919229377732762|-100.2430411156889
 16497452290|Christian oswaldo Mata carrizales|Carranza|78399|Nissan - Pipeline Piso Nuevos|None|None|2024-02-09|None|None|VERSA SENSE CVT|Credinissan|22.1332783|-100.9417016
 16497548829|Marbella Verenice Castillo Pinelo|Tlalpan|04630|Nissan - Pipeline Digital Nuevo|None|KICKS|2023-12-26|None|None|VERSA ADVANCE CVT|Credinissan|19.3186831|-99.1554865
 16497779812|Guillermo Cristóbal Rangel|Tlalpan|20328|Nissan - Pipeline Piso Nuevos|None|None|2024-02-29|None|None|Altima Exclusive Turbo|Credinissan|21.9156591|-102.3168529
@@ -3922,7 +3922,7 @@
 16661201768|Carlos Rodriguez Olvera|Insur|14650|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA ADVANCE CVT|Credinissan|19.2653697|-99.1681101
 16661378843|Daniel Betancourt Soto//GABRIELA MAGDALENA SOTO RODRIGUEZ|Carretera 57|20328|Nissan - Pipeline Piso Nuevos|None|None|2024-01-16|None|None|Frontier V6 PRO-4X|Credinissan|21.9156591|-102.3168529
 16661343356|Jorge Miguel Martinez Vazquez|Vertiz Campero|37257|Nissan - Pipeline Piso Nuevos|None|None|2023-12-28|None|None|V-DRIVE T/M A/C AUDIO|Contado|21.1272092|-101.6434142
-16661970015|Juan Manuel Rocha Najera|Carretera 57|79546|Nissan - Pipeline Digital Nuevo|None|VERSA|None|None|Formulario|KICKS ADVANCE CVT NEGRO|Banco autorizado|32.455463|-100.4083558
+16661970015|Juan Manuel Rocha Najera|Carretera 57|79546|Nissan - Pipeline Digital Nuevo|None|VERSA|None|None|Formulario|KICKS ADVANCE CVT NEGRO|Banco autorizado|22.116992846364695|100.68316621589285
 16662141792|María Guadalupe Mares García |Tlalpan|10700|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|SENTRA SENSE T/M|None|19.3132979|-99.2246524
 16662169749|Maria Magdalena Padron Hernandez|Rioverde|79600|Nissan - Pipeline Piso Nuevos|299909.0|None|2024-02-02|None|None|SENTRA ADVANCE T/M|Caja popular |None|None
 16662763644|Jaime López Cervantes|Centromax|37670|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|None|Credinissan|21.0996497|-101.5422012
@@ -6003,7 +6003,7 @@
 17812263737|Marco Antonio Ramirez Dominguez|Crossing|55067|Nissan - Pipeline Digital Nuevo|None|VERSA|2024-04-14|None|None|VERSA SENSE CVT|Credinissan|None|None
 17812330246|Alejandro Flores Ponce|La joya|08300|Nissan - Pipeline Digital Nuevo|None|FRONTIER|2024-03-13|None|None|Frontier LE TM|Contado|19.4016665|-99.1213276
 17812548996|Modesto Morales|Tlalpan|14470|Nissan - Pipeline Piso Seminuevo|None|None|2024-09-19|None|None|None|Credinissan|19.2383383|-99.1508823
-17812732219|Zeferina Almendárez Rodriguez|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|None|Banco autorizado|32.4529482|-99.7739906
+17812732219|Zeferina Almendárez Rodriguez|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|None|Banco autorizado|21.945581435733555|-100.85848962269688
 17814576655|Benjamin Fernando Arellano Gonzalez|Carranza|78430|Nissan - Pipeline Piso Nuevos|None|None|2024-04-12|None|None|KICKS ADVANCE TM|Credinissan|22.1894457|-100.9326593
 17813284895|PRODUCTORA NACIONAL DE PAPEL|Lomas|79500|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|NP300 PICK UP TM AC |Contado|None|None
 17813347904|Francisco Tomas Vargas Barrera|Tlalpan|54330|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|KICKS ADVANCE CVT GRIS|None|None|None
@@ -6348,7 +6348,7 @@
 18034734487|Filiberto Garcia Rodriguez|Tlalpan|54987|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|NP300 CHASIS DIESEL TM AC VDC SIN RADIO|Banco autorizado|None|None
 18034964034|Roberto Román|La joya|04830|Nissan - Pipeline Piso Nuevos|None|None|2024-03-15|None|None|MARCH ADVANCE TM |Credinissan|19.3192228|-99.1283047
 18035177593|Luis Antonio Ramirez Herrera|Vertiz Campero|37557|Nissan - Pipeline Piso Seminuevo|None|None|None|None|None|None|Banco autorizado|21.0905888|-101.6695295
-18035458445|LEONARDO IPIÑA IPIÑA|Carretera 57|79546|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|NP300 PICK UP TM AC |Sicrea|32.455463|-100.4083558
+18035458445|LEONARDO IPIÑA IPIÑA|Carretera 57|79546|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|NP300 PICK UP TM AC |Sicrea|22.116992846364695|100.68316621589285
 18035369792|Jesus Mario Galvan Salais|Forum|37299|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|KICKS ADVANCE CVT NEGRO|Credinissan|21.1158266|-101.6060322
 18035387299|JAVIER COLIN CRUZ |La joya|09760|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|Frontier SE TM|Credinissan|19.325098|-99.0569486
 18035762089|Reyes Marquez Perez|Tlalpan|40911|Nissan - Pipeline Piso Nuevos|None|None|2024-03-20|None|None|None|Contado|None|None
@@ -6879,7 +6879,7 @@
 18429108050|Gabriel Ortiz|Centromax|37538|Nissan - Pipeline Piso Nuevos|None|None|2024-04-06|None|None|VERSA SENSE CVT|Caja popular |21.0775189|-101.6342044
 18429728572|Antonio Martinez|Forum|37000|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|Altima SR Turbo|Credinissan|20.8853659|-101.4759163
 18432430970|JULIO RAMIREZ ACOSTA/RUBI YAZMIN RAMIREZ GARCIA|Nava|78430|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA SENSE TM|Credinissan|22.1894457|-100.9326593
-18432517934|Mario Alberto Oliva Gutierrez|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA SENSE TM|Credinissan|32.4529482|-99.7739906
+18432517934|Mario Alberto Oliva Gutierrez|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA SENSE TM|Credinissan|21.946085153147028|-100.8576252343044
 18432504075|Cesar Guerrero|Centromax|36644|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA SENSE CVT|Contado|20.6735378|-101.3785943
 18432754571|Gilberto Monroy Hernandez|Rioverde|76400|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|NP300 CHASIS TM AC|Credinissan|21.4231789|-99.6106929
 18430597952|MARCO ANTONIO RICAÑO GRAJEDA|La joya|08810|Nissan - Pipeline Piso Seminuevo|20082.0|None|None|None|None|V-DRIVE T/M A/C AUDIO|Credinissan|19.3870717|-99.1312591
@@ -9487,7 +9487,7 @@
 20633945766|Mireya Del Rocio Vargas Sanchez|Centromax|37140|Nissan - Pipeline Piso Nuevos|312895.0|None|2024-07-18|None|None|Frontier LE TA|Credinissan|21.163015|-101.66625
 20633787536|Ana Georgina Monsibais Sanchez|Tlalpan|20328|Nissan - Pipeline Piso Nuevos|None|None|2024-07-21|None|None|KICKS e-POWER ADVANCE|Leasing|21.9156591|-102.3168529
 20634244023|Silvia Cruz Bazaldua|Matehuala|67940|Nissan - Pipeline Piso Seminuevo|None|None|2024-08-01|None|None|Frontier XE TM|Contado|None|None
-20634631831|Diana Cortes Serrato|Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|None|Banco autorizado|30.2680493|-97.7470489
+20634631831|Diana Cortes Serrato|Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|None|Banco autorizado|23.669692034381153|-100.65097100000001
 20634775678|Juan Mauricio Tellez Sosa|La joya|62510|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|XTRAIL E-POWER PLATINUM 2 ROW|Contado|19.0281361|-99.2669765
 20634539809|Jorge Hilario Correa Lara|Tlalpan|55270|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|URVAN 14 PASAJEROS AMPLIA AA|Sicrea|None|None
 20637189025|Daniel Israel Fuentes Zamora|Carranza|78130|Nissan - Pipeline Piso Nuevos|71375.0|None|2024-08-31|None|None|VERSA SENSE TM|Contado|22.1830744|-101.0136097
@@ -9774,7 +9774,7 @@
 20862277004|Gabriela Reyes Saucedo|Rioverde|37549|Nissan - Pipeline Piso Nuevos|313525.0|None|2024-07-25|None|None|VERSA ADVANCE CVT|Banco autorizado|21.0738256|-101.6272729
 20862614164|Jose Antonio Salazar Reyes|Forum|37296|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|SENTRA SR PLATINUM CVT|Banco autorizado|21.1261835|-101.6063382
 20862764162|Jose Guadalupe Rubio Antonio/18|Nava|20328|Nissan - Pipeline Piso Nuevos|7.0|None|2024-08-06|None|None|MARCH SENSE TM|Credinissan|21.9156591|-102.3168529
-20862754339|Apolonio Guerrero Ceballos|Matehuala|78724|Nissan - Pipeline Digital Seminuevo|None|SEMINUEVOS|None|None|None|None|Credinissan|30.2680493|-97.7470489
+20862754339|Apolonio Guerrero Ceballos|Matehuala|78724|Nissan - Pipeline Digital Seminuevo|None|SEMINUEVOS|None|None|None|None|Credinissan|23.669692034381153|-100.65097100000001
 20863817653|Jorge Alberto Granjeno Romero|Insur|56524|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|V-DRIVE T/M A/C AUDIO|Credinissan|None|None
 20863873177|alba rivera|La joya|14420|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|SENTRA SR PLATINUM BITONO CVT|Banco autorizado|19.2798615|-99.1768111
 20863876786|Jose Enrique Bernal Torres|Tlalpan|04000|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|KICKS ADVANCE TM|Credinissan|19.3474352|-99.1621714
@@ -10552,7 +10552,7 @@
 21512102147|Sergio Ivan Martinez Medina|Rioverde|79900|Nissan - Pipeline Piso Nuevos|315377.0|None|None|None|None|URVAN PANEL VENTANAS AMPLIA |Caja popular |None|None
 21512388660|Maritza Berenice Licona Martinez|Matehuala|78760|Nissan - Pipeline Piso Nuevos|None|None|2024-12-30|None|None|SENTRA ADVANCE T/M|Credinissan|None|None
 21512380176|Autotransportes La Joya Tours S A De Cv|Carretera 57|37900|Nissan - Pipeline Piso Nuevos|7.0|None|None|None|None|URVAN 14 PASAJEROS AMPLIA AA|Credinissan|21.2928477|-100.5182879
-21513151152|Gildardo Maya Oliva|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|315723.0|None|None|None|None|Frontier Platinum LE TA|Contado|32.4529482|-99.7739906
+21513151152|Gildardo Maya Oliva|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|315723.0|None|None|None|None|Frontier Platinum LE TA|Contado|21.946085153147028|-100.8576252343044
 21513053111|Rogelio Bolaños Munguia|Nava|78436|Nissan - Pipeline Piso Nuevos|0.0|None|None|None|None|V-DRIVE T/M A/C AUDIO|Sicrea|22.1583918|-100.9428152
 21513463139|MARIA GUADALUPE HERNANDEZ ORTA|Nava|78394|Nissan - Pipeline Piso Seminuevo|315699.0|None|2024-09-10|None|None|MARCH ADVANCE TA|Credinissan|22.1312665|-100.9068642
 21513192280|AUTOTRANSPORTES LA JOYA TOURS S A DE CV venta 2|Carretera 57|37900|Nissan - Pipeline Piso Nuevos|7.0|None|None|None|None|URVAN 14 PASAJEROS AMPLIA AA|Credinissan|21.2928477|-100.5182879
@@ -11085,7 +11085,7 @@
 21871345500|Ernesto Toledo Espindola|Nava|78438|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|Frontier SE TM|Credinissan|22.1492033|-100.9074953
 21872216745|Francisco JavierFelipe Guerrero|Centromax|37544|Nissan - Pipeline Digital Nuevo|None|MARCH|2024-09-24|None|None|MARCH ADVANCE TA|Credinissan|21.0682756|-101.5708658
 21870110080|Nobla Residencial Sa De Cv Guillermo Noyola Blanca|Carranza|78183|Nissan - Pipeline Piso Nuevos|316889.0|None|2024-09-03|None|None|NP300 CHASIS DIESEL TM AC|Credinissan|22.1595413|-101.0421302
-21872535981|Jose Leopoldo Arredondo Segura|Nava|79525|Nissan - Pipeline Piso Seminuevo|217146.0|None|2024-09-13|None|None|VERSA SENSE TM|Credinissan|32.4529482|-99.7739906
+21872535981|Jose Leopoldo Arredondo Segura|Nava|79525|Nissan - Pipeline Piso Seminuevo|217146.0|None|2024-09-13|None|None|VERSA SENSE TM|Credinissan|21.944581477556465|-100.85758050000001
 21872456337|Martha Romero|Forum|37297|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA SENSE TM|Credinissan|21.1072472|-101.6112537
 21872746055|Margarita Alvarez Alvarado|Insur|14738|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|MARCH ADVANCE TA|Credinissan|19.2724903|-99.2399666
 21872722226|Edgar Servin/ Maribel Amaro|Centromax|37520|Nissan - Pipeline Piso Nuevos|0.0|None|2025-01-24|None|None|V-DRIVE T/M A/C AUDIO|Credinissan|21.0994401|-101.6520815
@@ -12408,7 +12408,7 @@
 28217318482|Modesto Loredo Pérez|Rioverde|79610|Nissan - Pipeline Piso Nuevos|323366.0|None|None|None|None|VERSA ADVANCE CVT|Credinissan|21.9328922|-99.9978136
 28224976927|Hermelinda Tenorio Gallardo|Nava|78433|Nissan - Pipeline Piso Nuevos|5311376.0|None|2024-11-02|None|None|Frontier XE TM|Credinissan|22.1836132|-100.9480603
 23403464822|Martha Lara Carreon|Centromax|37295|Nissan - Pipeline Piso Nuevos|None|None|2024-10-31|None|None|VERSA SENSE TM|Credinissan|21.0979407|-101.5947318
-23406840428|MARIA FELIPA RAMOS |Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|MARCH ADVANCE TA|Credinissan|30.2680493|-97.7470489
+23406840428|MARIA FELIPA RAMOS |Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|MARCH ADVANCE TA|Credinissan|23.669692034381153|-100.65097100000001
 28225164162|Jose Luis Martinez Rodriguez|Matehuala|78745|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|Frontier XE TM|Credinissan|30.2152705|-97.7678877
 28217483074|Christian Eduardo Reséndiz Carranco|Forum|37330|Nissan - Pipeline Digital Seminuevo|None|VERSA|2024-11-28|None|Formulario|VERSA SENSE CVT|Caja popular |21.1319963|-101.7064197
 28225739801|HECTOR DURAZNO OLIVARES|La joya|14030|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|V-DRIVE T/M A/C AUDIO|Credinissan|19.3004197|-99.1730439
@@ -12887,7 +12887,7 @@
 28730010947|Luis Fernando Reyes Almendarez|Lomas|78433|Nissan - Pipeline Piso Seminuevo|325557.0|None|2024-12-31|None|None|XTRAIL EXCLUSIVE 2 ROW|Credinissan|22.1836132|-100.9480603
 28722640312|FERNANDO ORNELAS|Centromax|37150|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA ADVANCE MT|Credinissan|21.1561983|-101.698804
 28739220542|Miguel Dario Hernández Solís|Carretera 57|78389|Nissan - Pipeline Piso Nuevos|None|None|2024-11-27|None|None|V-DRIVE T/M A/C AUDIO|Banco autorizado|22.1278711|-100.9595969
-28734177319|RAMIRO OZHMAR PALOMO PORTALES|Nava|78963|Nissan - Pipeline Piso Nuevos|11111.0|None|None|None|None|SENTRA ADVANCE T/M|Credinissan|30.1024288|-97.3297994
+28734177319|RAMIRO OZHMAR PALOMO PORTALES|Nava|78963|Nissan - Pipeline Piso Nuevos|11111.0|None|None|None|None|SENTRA ADVANCE T/M|Credinissan|22.459049593495955|-100.67503131707313
 28736339289|Abel Vazquez|Lomas|78470|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|None|Contado|27.7942955|-97.4075264
 28741852283|Juan Pablo Carcoba Cano|Forum|37408|Nissan - Pipeline Digital Nuevo|None|VERSA|None|None|Formulario|VERSA SENSE TM|Credinissan|21.111575|-101.7360202
 28725462842|SERGIO RODRIGUEZ DE LA VEGA FAMILIAR|Crossing|01780|Nissan - Pipeline Piso Nuevos|5516271.0|None|None|None|None|XTRAIL E-POWER PLATINUM 2 ROW|Credinissan|19.3368675|-99.2345542
@@ -14803,7 +14803,7 @@
 31204036247|Ivan Uriel Reyes Samano|Carretera 57|78340|Nissan - Pipeline Piso Seminuevo|123456.0|None|2025-01-13|None|None|None|Sicrea|22.142689|-100.9669272
 31179066806|Maria Blanca Diaz Castillo|Carretera 57|78430|Nissan - Pipeline Piso Nuevos|176785.0|None|2025-01-04|None|None|NP300 CHASIS TM AC|Credinissan|22.1894457|-100.9326593
 31195961475|J. Refugio Ramirez Ayala|Lomas|78473|Nissan - Pipeline Piso Nuevos|179998.0|None|None|None|None|None|Credinissan|None|None
-31203565632|Martha Patricia Martinez Cruz|Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA SENSE CVT|Contado|30.2680493|-97.7470489
+31203565632|Martha Patricia Martinez Cruz|Matehuala|78724|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|VERSA SENSE CVT|Contado|23.669692034381153|-100.65097100000001
 31200101651|LETICIA ARELLANO ALCANTAR|Insur|06600|Nissan - Pipeline Piso Nuevos|1.0|None|None|None|None|KICKS ADVANCE CVT NEGRO|Credinissan|19.4280593|-99.1591064
 31201163355|Briones Briones Segura|Centromax|37669|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|MARCH SENSE TM|Credinissan|21.176642|-101.7509208
 31197214083|Juan Jose Genaro Amezquita Vazquez|Centromax|47420|Nissan - Pipeline Piso Nuevos|0.0|None|2025-01-11|None|None|NP300 PICK UP TM AC |Contado|21.3688463|-101.9242484
@@ -17475,7 +17475,7 @@
 34795940971|MAYRIM FERNANDA MANRIQUE SANCHEZ |Nava|78430|Nissan - Pipeline Digital Nuevo|0.0|MARCH|2025-03-26|None|Whatsapp Agencia|MARCH SENSE TA |Credinissan|22.1894457|-100.9326593
 34797631280|Luis Angel Mendez Nieto|Rioverde|79680|Nissan - Pipeline Piso Nuevos|331630.0|None|2025-04-01|None|None|KICKS ADVANCE CVT NEGRO|Credinissan|None|None
 34787062145|Valonia Sport|Forum|36400|Nissan - Pipeline Piso Nuevos|283706.0|None|2025-03-21|None|None|MARCH SENSE TA |Contado|21.0334411|-101.8755482
-34791752545|Maria del Rosario Galván García|Rioverde|79605|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|KICKS PLATINUM CVT NEGRO |Caja popular |32.4529482|-99.7739906
+34791752545|Maria del Rosario Galván García|Rioverde|79605|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|KICKS PLATINUM CVT NEGRO |Caja popular |21.919229377732762|-100.2430411156889
 34794076944|ERIK AURRECOECHEA MURGUIA|Insur|54935|Nissan - Pipeline Piso Nuevos|3309283.0|None|None|None|None|XTRAIL PLATINUM 3 ROW|Credinissan|None|None
 34785524409|MICHELLE ABIGAIL REYNA PEREZ|Carretera 57|78390|Nissan - Pipeline Piso Nuevos|319665.0|None|2025-03-28|None|None|VERSA SENSE TM|Contado|22.1415824|-100.931817
 34793463320|Juan Antonio Perez Fragoso|Carretera 57|78394|Nissan - Pipeline Piso Nuevos|11278473|None|None|None|None|VERSA SENSE TM|Contado|22.1312665|-100.9068642
@@ -22485,7 +22485,7 @@
 41106936447|JAIME VARELA COLIN|Tlalpan|06700|Nissan - Pipeline Piso Nuevos|None|None|None|None|None|MARCH ADVANCE TA|Contado|19.4192902|-99.1650714
 41087176483|Ramon Esau Moran Contreras|Nava|78433|Nissan - Pipeline Piso Nuevos|342346.0|KICKS|2025-09-03|None|None|KICKS PLATINUM CVT NEGRO BI-TONO|Credinissan|22.1836132|-100.9480603
 41078976062|Leandro Torres|Centromax|37548|Nissan - Pipeline Digital Nuevo|341197.0|MAGNITE|2025-08-25|None|Formulario|MAGNITE ADVANCE TM|Caja popular |21.0631933|-101.6146115
-41094478368|CECILIA SEGURA MOLINA|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|340844.0|None|2025-07-31|None|None|MAGNITE EXCLUSIVE CVT|Credinissan|32.4529482|-99.7739906
+41094478368|CECILIA SEGURA MOLINA|Carretera 57|79525|Nissan - Pipeline Piso Nuevos|340844.0|None|2025-07-31|None|None|MAGNITE EXCLUSIVE CVT|Credinissan|21.94582929454218|-100.85906765132947
 41099526691|Arturo Ascencion Baez Rodriguez|Nava|78310|Nissan - Pipeline Piso Nuevos|None|VERSA|None|None|None|None|Credinissan|22.1549207|-100.963336
 41103021190|Antonio Molina Sanchez|Carranza|78470|Nissan - Pipeline Piso Nuevos|0.0|None|None|None|None|NP300 CHASIS TM AC VDC|Contado|27.7942955|-97.4075264
 41111031407|INMOBILIARIA DIALZA|Centromax|37520|Nissan - Pipeline Piso Nuevos|340812.0|NP300|None|None|None|NP300 CHASIS TM AC VDC|Contado|21.0994401|-101.6520815
