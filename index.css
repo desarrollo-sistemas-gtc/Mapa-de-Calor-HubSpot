@@ -392,3 +392,8 @@ select[multiple] option:checked {
     font-weight: 600;
     color: #7f8c8d;
 }
+
+.custom-select-option input[type="checkbox"] {
+    pointer-events: none;
+    /* El checkbox no captura eventos, solo el div padre */
+}
