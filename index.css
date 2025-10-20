@@ -198,6 +198,8 @@ select[multiple] option:checked {
     cursor: pointer;
     width: 16px;
     height: 16px;
+    pointer-events: none;
+    margin: 0;
 }
 
 .select-count-badge {
@@ -391,9 +393,4 @@ select[multiple] option:checked {
 .popup-label {
     font-weight: 600;
     color: #7f8c8d;
-}
-
-.custom-select-option input[type="checkbox"] {
-    pointer-events: none;
-    /* El checkbox no captura eventos, solo el div padre */
 }

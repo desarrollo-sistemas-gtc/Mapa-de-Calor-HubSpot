@@ -285,7 +285,6 @@
             this.toggleDropdown(wrapper);
           });
 
-          // Cerrar dropdown al hacer clic fuera
           document.addEventListener('click', (e) => {
             if (!wrapper.contains(e.target)) {
               this.closeDropdown(wrapper);
@@ -300,7 +299,6 @@
         const arrow = wrapper.querySelector('.custom-select-arrow');
         const isOpen = dropdown.classList.contains('open');
 
-        // Cerrar todos los otros dropdowns
         document.querySelectorAll('.custom-select-dropdown').forEach(d => {
           d.classList.remove('open');
         });
@@ -333,43 +331,40 @@
         const dropdown = wrapper.querySelector('.custom-select-dropdown');
 
         let html = `
-          <div class="custom-select-option" data-value="__ALL__">
-            <input type="checkbox" ${this.selectedValues[filterType].includes('__ALL__') ? 'checked' : ''}>
-            <span>— Todos —</span>
-          </div>
-        `;
+      <div class="custom-select-option" data-value="__ALL__">
+        <input type="checkbox" ${this.selectedValues[filterType].includes('__ALL__') ? 'checked' : ''} tabindex="-1">
+        <span>— Todos —</span>
+      </div>
+    `;
 
         values.forEach(value => {
           const isChecked = this.selectedValues[filterType].includes(value);
           html += `
-            <div class="custom-select-option" data-value="${Utils.escapeHtml(value)}">
-              <input type="checkbox" ${isChecked ? 'checked' : ''}>
-              <span>${Utils.escapeHtml(value)}</span>
-            </div>
-          `;
+        <div class="custom-select-option" data-value="${Utils.escapeHtml(value)}">
+          <input type="checkbox" ${isChecked ? 'checked' : ''} tabindex="-1">
+          <span>${Utils.escapeHtml(value)}</span>
+        </div>
+      `;
         });
 
         dropdown.innerHTML = html;
 
-        // Agregar event listeners
+        // Event listener ÚNICO en el contenedor
         dropdown.querySelectorAll('.custom-select-option').forEach(option => {
-          const checkbox = option.querySelector('input[type="checkbox"]');
           const value = option.dataset.value;
 
-          // Si el usuario hace click en el checkbox, no dispares el evento del div
-          // Solo usar el evento change en el checkbox
-          checkbox.addEventListener('change', (e) => {
+          // Solo UN listener en el DIV completo
+          option.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevenir el comportamiento por defecto
             e.stopPropagation();
+
             if (value === '__ALL__') {
               this.selectAll(filterType, wrapper);
             } else {
               this.toggleOption(filterType, value, wrapper);
             }
+
             this.updateTriggerText(wrapper, filterType);
-          });
-          // Permitir que el label (span) también active el checkbox por accesibilidad
-          option.querySelector('span').addEventListener('click', () => {
-            checkbox.click();
           });
         });
       },
@@ -380,11 +375,12 @@
         const isAllChecked = allCheckbox.checked;
 
         if (isAllChecked) {
-          // Deseleccionar todo
           this.selectedValues[filterType] = [];
+          wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         } else {
-          // Seleccionar todo
           this.selectedValues[filterType] = ['__ALL__'];
+          wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+          allCheckbox.checked = true;
         }
       },
 
@@ -395,26 +391,28 @@
         const allCheckbox = allOption.querySelector('input[type="checkbox"]');
 
         if (checkbox.checked) {
-          // Seleccionar
-          // Remover __ALL__ si existe
-          const allIndex = this.selectedValues[filterType].indexOf('__ALL__');
-          if (allIndex > -1) {
-            this.selectedValues[filterType].splice(allIndex, 1);
-          }
-          if (!this.selectedValues[filterType].includes(value)) {
-            this.selectedValues[filterType].push(value);
-          }
-        } else {
-          // Deseleccionar
+          checkbox.checked = false;
           const index = this.selectedValues[filterType].indexOf(value);
           if (index > -1) {
             this.selectedValues[filterType].splice(index, 1);
           }
+        } else {
+          checkbox.checked = true;
+
+          const allIndex = this.selectedValues[filterType].indexOf('__ALL__');
+          if (allIndex > -1) {
+            this.selectedValues[filterType].splice(allIndex, 1);
+            allCheckbox.checked = false;
+          }
+
+          if (!this.selectedValues[filterType].includes(value)) {
+            this.selectedValues[filterType].push(value);
+          }
         }
 
-        // Si no hay nada seleccionado, seleccionar __ALL__
         if (this.selectedValues[filterType].length === 0) {
           this.selectedValues[filterType] = ['__ALL__'];
+          allCheckbox.checked = true;
         }
       },
 
