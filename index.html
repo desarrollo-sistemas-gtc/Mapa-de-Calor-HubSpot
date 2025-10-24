@@ -15,6 +15,10 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- Calendario por rangos -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
   <!-- MarkerCluster -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -76,6 +80,33 @@
       <label for="search-text">🔎 Buscar</label>
       <div class="search-box">
         <input id="search-text" type="text" placeholder="🔍Nombre o código postal..." />
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label for="delivery-date">📅 Fecha de Entrega</label>
+      <div class="date-range-wrapper">
+        <input type="text" id="date-range" name="delivery-date" class="date-input-flatpickr"
+          placeholder="Seleccionar rango..." readonly />
+        <button class="btn-clear-dates" id="btnClearDates" title="Limpiar fechas">✕</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label for="date-range-created">📅 Fecha de Creación</label>
+      <div class="date-range-wrapper">
+        <input type="text" id="date-range-created" name="creation-date" class="date-input-flatpickr"
+          placeholder="Seleccionar rango..." readonly />
+        <button class="btn-clear-dates" id="btnClearCreatedDates" title="Limpiar fechas">✕</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label for="date-range-visit">📅 Fecha de Visita</label>
+      <div class="date-range-wrapper">
+        <input type="text" id="date-range-visit" name="visit-date" class="date-input-flatpickr"
+          placeholder="Seleccionar rango..." readonly />
+        <button class="btn-clear-dates" id="btnClearVisitDates" title="Limpiar Fechas">✕</button>
       </div>
     </div>
 
@@ -492,7 +523,13 @@
           modelo: CustomSelect.getSelectedValues('modelo'),
           tipo: CustomSelect.getSelectedValues('tipo'),
           searchText: document.getElementById('search-text').value.trim().toLowerCase(),
-          cuentaCliente: document.getElementById('filter-cuenta-cliente').checked
+          cuentaCliente: document.getElementById('filter-cuenta-cliente').checked,
+          dateFrom: selectedDateRange.from,
+          dateTo: selectedDateRange.to,
+          createdDateFrom: selectedCreatedDateRange.from,
+          createdDateTo: selectedCreatedDateRange.to,
+          visitDateFrom: selectedVisitDateRange.from,
+          visitDateTo: selectedVisitDateRange.to
         };
 
         STATE.filteredRecords = STATE.allRecords.filter(record => {
@@ -536,6 +573,33 @@
           // Filtro de cuenta_cliente
           if (filters.cuentaCliente) {
             if (!record.cuenta_cliente || String(record.cuenta_cliente).toLowerCase() === 'none') {
+              return false;
+            }
+          }
+
+          // Filtro fecha de entrega
+          if (filters.dateFrom && filters.dateTo) {
+            const recordDate = new Date(record.fecha_entrega);
+
+            if (recordDate < filters.dateFrom || recordDate > filters.dateTo) {
+              return false;
+            }
+          }
+
+          // Filtro fecha de creación
+          if (filters.createdDateFrom && filters.createdDateTo) {
+            const recordCreateDate = new Date(record.fecha_creacion);
+
+            if (recordCreateDate < filters.createdDateFrom || recordCreateDate > filters.createdDateTo) {
+              return false;
+            }
+          }
+
+          // Filtro fecha de visita
+          if (filters.visitDateFrom && filters.visitDateTo) {
+            const recordVisitDate = new Date(record.fecha_visita);
+
+            if (recordVisitDate < filters.visitDateFrom || recordVisitDate > filters.visitDateTo) {
               return false;
             }
           }
@@ -693,6 +757,15 @@
           <div class="popup-field">
             <span class="popup-label">Tipo:</span> ${Utils.escapeHtml(record.tipo_solicitud_compra || 'N/A')}
           </div>
+          <div class="popup-field">
+            <span class="popup-label">Fecha de Entrega:</span> ${Utils.escapeHtml(record.fecha_entrega || 'No registrada')}
+          </div>
+          <div class="popup-field">
+            <span class="popup-label">Fecha de Creación:</span> ${Utils.escapeHtml(record.fecha_creacion || 'No registrada')}
+          </div>
+          <div class="popup-field">
+            <span class="popup-label">Fecha de Visita:</span> ${Utils.escapeHtml(record.fecha_visita || 'No registrada')}
+          </div>
         `;
       },
 
@@ -815,8 +888,121 @@
     // ========================================
     document.addEventListener('DOMContentLoaded', () => {
       CustomSelect.init();
+      initializeFlatpickr();
       initializeEventListeners();
       loadData();
+    });
+    // Variable global para almacenar las fechas seleccionadas
+    let selectedDateRange = { // Fecha de entrega
+      from: null,
+      to: null
+    };
+
+    let selectedCreatedDateRange = { // Fecha de creación
+      from: null,
+      to: null
+    };
+
+    let selectedVisitDateRange = { // Fecha de visita
+      from: null,
+      to: null
+    };
+
+    // Inicializar Flatpickr
+    let flatpickrInstance; // Fecha de entrega
+    let flatpickrCreatedInstance; // Fecha de creación
+    let flatpickrVisitInstance; // Fecha de visita
+
+    function initializeFlatpickr() {
+      // Fecha de entrega
+      flatpickrInstance = flatpickr("#date-range", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        locale: "es", // Español
+        altInput: true,
+        altFormat: "j M, Y", // Formato de visualización: "15 Ene, 2025"
+        showMonths: 2, // Mostrar 2 meses a la vez (bonito en desktop)
+        conjunction: " → ", // Separador entre fechas
+        allowInput: false, // No permitir escritura manual
+        onChange: function (selectedDates, dateStr, instance) {
+          if (selectedDates.length === 2) {
+            selectedDateRange.from = selectedDates[0];
+            selectedDateRange.to = selectedDates[1];
+            console.log("Rango seleccionado:", selectedDateRange);
+            // Aplicar filtros automáticamente cuando se selecciona un rango
+            FilterManager.applyFilters();
+          }
+        },
+        onReady: function (selectedDates, dateStr, instance) {
+          // Opcional: agregar clase personalizada al calendario
+          instance.calendarContainer.classList.add('flatpickr-custom');
+        }
+      });
+
+      // Fecha de creación
+      flatpickrCreatedInstance = flatpickr("#date-range-created", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        locale: "es",
+        altInput: true,
+        altFormat: "j M, Y",
+        showMonths: 2,
+        conjunction: " → ",
+        allowInput: false,
+        onChange: function (selectedDates, dateStr, instance) {
+          if (selectedDates.length === 2) {
+            selectedCreatedDateRange.from = selectedDates[0];
+            selectedCreatedDateRange.to = selectedDates[1];
+            console.log("Rango de creación seleccionado: ", selectedCreatedDateRange);
+            FilterManager.applyFilters();
+          }
+        },
+        onReady: function (selectedDates, dateStr, instance) {
+          instance.calendarContainer.classList.add('flatpickr-custom');
+        }
+      });
+
+      // Fecha de visita
+      flatpickrVisitInstance = flatpickr("#date-range-visit", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        locale: "es",
+        altInput: true,
+        altFormat: "j M, Y",
+        showMonths: 2,
+        conjunction: " → ",
+        allowInput: false,
+        onChange: function (selectedDates, dateStr, instance) {
+          if (selectedDates.length === 2) {
+            selectedVisitDateRange.from = selectedDates[0];
+            selectedVisitDateRange.to = selectedDates[1];
+            console.log("Rango de creación seleccionado: ", selectedVisitDateRange);
+            FilterManager.applyFilters();
+          }
+        },
+        onReady: function (selectedDates, dateStr, instance) {
+          instance.calendarContainer.classList.add('flatpickr-custom');
+        }
+      });
+    }
+
+    // Botón para limpiar fechas
+    document.getElementById('btnClearDates').addEventListener('click', () => {
+      flatpickrInstance.clear();
+      selectedDateRange = { from: null, to: null };
+      FilterManager.applyFilters();
+    });
+
+    document.getElementById('btnClearCreatedDates').addEventListener('click', () => {
+      flatpickrCreatedInstance.clear();
+      selectedCreatedDateRange = { from: null, to: null };
+      FilterManager.applyFilters();
+    });
+
+    document.getElementById('btnClearVisitDates').addEventListener('click', () => {
+      flatpickrVisitInstance.clear();
+      selectedVisitDateRange = { from: null, to: null };
+      FilterManager.applyFilters();
     });
   </script>
 </body>

@@ -74,7 +74,7 @@ body {
 }
 
 .controls-panel select,
-.controls-panel input[type="text"] {
+.controls-panel input[type="text"]:not(.date-input-flatpickr) {
     width: 100%;
     padding: 8px;
     border-radius: 6px;
@@ -393,4 +393,153 @@ select[multiple] option:checked {
 .popup-label {
     font-weight: 600;
     color: #7f8c8d;
+}
+
+/* Selector de rango de fechas */
+.date-range-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6x;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.date-sublabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.date-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #bdc3c7;
+    font-size: 13px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.2s;
+    background: white;
+    color: #2c3e50;
+    cursor: pointer;
+}
+
+.date-input:hover {
+    border-color: #3498db;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Estilo para el calendario del input date */
+.date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 4px;
+    transition: background 0.2s;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+    background: #ecf0f1;
+}
+
+/* Para navegadores que soportan color-scheme */
+.date-input {
+    color-scheme: light;
+}
+
+/* Input de Flatpickr */
+.date-input-flatpickr {
+    width: 85%;
+    margin-right: 13px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #bdc3c7;
+    font-size: 13px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.2s;
+    background: white;
+    color: #2c3e50;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.date-input-flatpickr:hover {
+    border-color: #3498db;
+}
+
+.date-input-flatpickr:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Botón de limpiar fechas */
+.btn-clear-dates {
+    width: 10%;
+    height: 32px;
+    /*padding: 6px 12px;*/
+    border-radius: 6px;
+    border: 1px solid #e74c3c;
+    background: white;
+    color: #e74c3c;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.btn-clear-dates:hover {
+    background: #e74c3c;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
+.btn-clear-dates:active {
+    transform: translateY(0);
+}
+
+/* Personalización del calendario Flatpickr */
+.flatpickr-calendar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 8px !important;
+    border: 1px solid #bdc3c7 !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+}
+
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+}
+
+.flatpickr-day.inRange {
+    background: rgba(102, 126, 234, 0.2) !important;
+    border-color: rgba(102, 126, 234, 0.2) !important;
 }
