@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 
 <head>
   <meta charset="utf-8" />
@@ -233,6 +233,7 @@
     // PARSER DE DATOS
     // ========================================
     const DataParser = {
+      
       parse(text) {
         const lines = text.split(/\r?\n/).filter(line => line.trim());
         const records = [];
@@ -863,14 +864,45 @@
     async function loadData() {
       try {
         const cacheBuster = new Date().getTime();
-        const response = await fetch(`${CONFIG.dataFile}?v=${cacheBuster}`);
+        let dataDeals = [];
+
+        fetch('http://localhost:8000/hubspot/deals', { method: 'GET', headers: { 'Content-Type': 'application/json' }})
+          .then(response => response.json())
+          .then(data => {
+            data.forEach(item => {
+              console.log(item);
+              const valor = {
+                id: item.hubspot_id, 
+                agencia: item.branch,
+                codigo_postal: item.postal_code,
+                dealname: item.name,
+                latitud: item.lat,
+                longitud: item.lng,
+                pipeline: item.pipeline,
+                cuenta_cliente: item.cuenta_personal,
+                modelo_int_ctc: item.modelo,
+              };
+
+              dataDeals.push(valor)
+
+            });
+            STATE.allRecords = dataDeals;
+            STATE.filteredRecords = STATE.allRecords;
+            FilterManager.buildFilterOptions();
+            FilterManager.applyFilters();
+
+            console.info('✓ Datos cargados exitosamente');
+          });
+
+        
+        /*const response = await fetch(`${CONFIG.dataFile}?v=${cacheBuster}`);
 
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);
         }
 
         const text = await response.text();
-        STATE.allRecords = DataParser.parse(text);
+        STATE.allRecords = DataParser.parse(text);*/
         STATE.filteredRecords = STATE.allRecords;
 
         FilterManager.buildFilterOptions();
